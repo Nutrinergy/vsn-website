@@ -1,0 +1,37 @@
+---
+import { SITE } from '../consts';
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  schema?: object;
+  published?: Date;
+  updated?: Date;
+}
+const { title, description, image = SITE.ogImage, imageAlt = SITE.name, type = 'website', noindex = false, schema, published, updated } = Astro.props;
+const canonical = new URL(Astro.url.pathname, SITE.url).toString();
+const fullTitle = title.includes('VSN') || title.includes(SITE.name) ? title : `${title} | VSN`;
+const ogImage = new URL(image, SITE.url).toString();
+---
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+<meta property="og:locale" content={SITE.locale} />
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+{published && <meta property="article:published_time" content={published.toISOString()} />}
+{updated && <meta property="article:modified_time" content={updated.toISOString()} />}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@SportdietistNL" />
+{schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}

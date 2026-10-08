@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import Arcs from '../components/Arcs.astro';
+---
+<Base title="Bedankt voor je bericht" description="We hebben je bericht ontvangen en reageren binnen twee weken." noindex>
+  <section class="section thanks">
+    <div class="wrap--narrow inner">
+      <Arcs class="t-arcs" width={30} />
+      <h1>Bedankt!</h1>
+      <p class="lead">We hebben je bericht goed ontvangen. Je hoort binnen twee weken van ons.</p>
+      <div class="btn-row">
+        <a class="btn" href="/">Naar de homepage <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="/kennisbank/">Lees in de kennisbank</a>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .inner { display: grid; gap: var(--space-m); justify-items: start; }
+  .inner :global(.t-arcs) { width: 120px; }
+</style>

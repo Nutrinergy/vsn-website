@@ -1,0 +1,118 @@
+---
+import { FORM_ENDPOINT, THANKS_URL } from '../consts';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { breadcrumbs, webPage, faq } from '../lib/schema';
+import { FAQ_VERENIGING } from '../data/faq';
+import { PARTNERS } from '../consts';
+import hero from '../assets/foto/studiedag-vraag.jpg';
+import mysportscience from '../assets/partners/mysportscience-logo.png';
+
+const title = 'Lid worden van de VSN: hét netwerk voor sportvoedingsexperts';
+const description = 'Word lid van de Vereniging Sportvoedingsexperts Nederland: bijscholing, intervisie, korting op scholing, de VSN-community en vermelding op de landelijke kaart.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Lid worden', href: '/lid-worden/' }];
+const krijg = [
+  'Toegang tot het ledenportaal met vakinformatie, tools en updates',
+  'Uitnodigingen voor de ALV, masterclass, studiedag en intervisie',
+  'Korting op bij- en nascholing, zoals 30% bij Mysportscience Academy',
+  'Toegang tot de VSN-community en het ledenforum',
+  'Vermelding op de landelijke kaart, zodat sporters je vinden',
+  'De titel sportdiëtist-VSN® (voor sportdiëtisten)',
+];
+---
+<Base {title} {description} schema={[webPage({ path: '/lid-worden/', title, description }), breadcrumbs(crumbs), faq(FAQ_VERENIGING.slice(2))]}>
+  <PageHero {crumbs} kicker="Lid worden" title="Word lid van de VSN" lead="Sluit je aan bij hét netwerk voor sportvoedingsexperts. Of je nu net start of al jaren meedraait: samen versterken we het vak, delen we kennis en tillen we sportvoeding naar een hoger niveau." image={hero} imageAlt="Een lid steekt haar hand op om een vraag te stellen tijdens de VSN studiedag">
+    <p><a class="btn" href="#aanmelden">Direct aanmelden <span class="arrow" aria-hidden="true">↓</span></a></p>
+  </PageHero>
+
+  <section class="section section--tight">
+    <div class="wrap grid3">
+      <div class="col" data-reveal>
+        <h2 class="h3">Wat krijg je als lid?</h2>
+        <ul class="checks" role="list">{krijg.map((k) => <li>{k}</li>)}</ul>
+      </div>
+      <div class="col" data-reveal style="--d:1">
+        <h2 class="h3">Voor wie?</h2>
+        <p>Voor elke <strong>sportdiëtist</strong> met een afgeronde post-HBO opleiding Sportdiëtetiek, en voor <strong>voedingswetenschappers en sportprofessionals</strong> met een IOC-diploma of ander relevant diploma in Sports Nutrition.</p>
+        <p>Je wilt up-to-date blijven, kennis delen en deel uitmaken van een vakgroep die zich inzet voor kwaliteit en zichtbaarheid.</p>
+      </div>
+      <a class="col promo" href={PARTNERS.mysportscience} rel="noopener" target="_blank" data-reveal style="--d:2">
+        <span class="p-logo"><Image src={mysportscience} alt="Mysportscience Academy" width={160} /></span>
+        <span class="p-big">30% korting</span>
+        <span>Als lid krijg je korting op de Mysportscience Academy: scholing van wetenschap naar praktijk, inclusief SCAS-punten.</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="section section--paper2" id="aanmelden" aria-labelledby="form-t">
+    <div class="wrap form-layout">
+      <div class="f-intro">
+        <p class="label">Aanmeldformulier</p>
+        <h2 id="form-t">Meld je aan</h2>
+        <p>Vul het formulier in. Het secretariaat controleert je gegevens en neemt binnen twee weken contact met je op over de vervolgstappen en de contributie.</p>
+        <p class="muted small">We gebruiken je gegevens alleen voor de ledenadministratie. Lees de <a href="/privacyverklaring/">privacyverklaring</a>.</p>
+      </div>
+      <form class="form card" name="lid-worden" method="POST" action={FORM_ENDPOINT || '/bedankt/'} data-netlify={FORM_ENDPOINT ? undefined : 'true'} netlify-honeypot={FORM_ENDPOINT ? undefined : 'bot-field'}>
+        <input type="hidden" name="form-name" value="lid-worden" />
+        {FORM_ENDPOINT && <><input type="hidden" name="_next" value={THANKS_URL} /><input type="hidden" name="redirect" value={THANKS_URL} /><input type="hidden" name="_subject" value="Nieuw bericht via sportdietetiek.nl (lid-worden)" /></>}
+        <p class="hp"><label>Niet invullen <input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+        <div class="form-grid">
+          <div class="field"><label for="voornaam">Voornaam</label><input id="voornaam" name="voornaam" autocomplete="given-name" required /></div>
+          <div class="field"><label for="achternaam">Achternaam</label><input id="achternaam" name="achternaam" autocomplete="family-name" required /></div>
+          <div class="field"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required /></div>
+          <div class="field"><label for="telefoon">Telefoonnummer</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" /></div>
+          <div class="field span-2">
+            <label for="opleiding">Opleiding</label>
+            <select id="opleiding" name="opleiding" required>
+              <option value="">Kies je opleiding</option>
+              <option>Post-HBO Sportdiëtetiek (HvA of HAN)</option>
+              <option>IOC Diploma in Sports Nutrition</option>
+              <option>Master Sports and Nutrition (of vergelijkbaar)</option>
+              <option>Andere opleiding (licht toe)</option>
+            </select>
+          </div>
+          <div class="field"><label for="praktijk">Praktijknaam <span class="muted">(optioneel)</span></label><input id="praktijk" name="praktijk" autocomplete="organization" /></div>
+          <div class="field"><label for="plaats">Vestigingsplaats</label><input id="plaats" name="plaats" autocomplete="address-level2" /></div>
+          <fieldset class="field span-2">
+            <legend>Ben je SCAS-geregistreerd?</legend>
+            <label class="choice"><input type="radio" name="scas" value="ja" /> Ja</label>
+            <label class="choice"><input type="radio" name="scas" value="nee" /> Nee</label>
+            <label class="choice"><input type="radio" name="scas" value="nvt" /> Niet van toepassing</label>
+          </fieldset>
+          <div class="field span-2"><label for="toelichting">Toelichting <span class="muted">(optioneel)</span></label><textarea id="toelichting" name="toelichting" placeholder="Bijvoorbeeld je werkveld of interesse in een werkgroep"></textarea></div>
+          <label class="choice span-2"><input type="checkbox" name="akkoord" required /> Ik ga akkoord met de verwerking van mijn gegevens volgens de privacyverklaring.</label>
+        </div>
+        <button class="btn" type="submit">Verstuur aanmelding <span class="arrow" aria-hidden="true">→</span></button>
+      </form>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="faq-t">
+    <div class="wrap--narrow">
+      <h2 id="faq-t" class="h3">Vragen over het lidmaatschap</h2>
+      <div class="faq">{FAQ_VERENIGING.map((x) => <details><summary>{x.q}</summary><p>{x.a}</p></details>)}</div>
+      <p class="more">Andere vraag? <a href="/contact/">Neem contact op</a>.</p>
+    </div>
+  </section>
+</Base>
+<style>
+  .grid3 { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); align-items: stretch; }
+  .col { display: grid; gap: var(--space-s); align-content: start; padding: var(--space-l) var(--space-m); border-radius: var(--radius-lg); box-shadow: 0 0 0 1px var(--line); background: oklch(0.99 0.004 85); }
+  .col p { color: var(--ink-2); }
+  .checks { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
+  .checks li { position: relative; padding-left: 1.9rem; line-height: 1.45; }
+  .checks li::before { content: ''; position: absolute; left: 0; top: 0.2rem; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: var(--orange) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.2 5.1 8.2 9 4' fill='none' stroke='%23062427' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 0.8rem no-repeat; }
+  .promo { background: var(--teal-ink); color: oklch(0.88 0.02 195); text-decoration: none; box-shadow: none; transition: transform 0.3s var(--ease-out); }
+  .promo:hover { transform: translateY(-3px); color: var(--paper); }
+  .p-logo { display: grid; place-items: center; justify-self: start; padding: 0.6rem 0.9rem; border-radius: var(--radius-s); background: var(--paper); }
+  .p-logo :global(img) { max-height: 3rem; width: auto; }
+  .p-big { font-size: clamp(2.4rem, 1.6rem + 2.6vw, 3.6rem); font-weight: 900; font-stretch: 125%; letter-spacing: -0.03em; color: var(--orange); line-height: 1; }
+  .form-layout { display: grid; gap: var(--space-l); }
+  @media (min-width: 60rem) { .form-layout { grid-template-columns: 0.7fr 1.3fr; gap: var(--space-xl); } .f-intro { position: sticky; top: 6.5rem; align-self: start; } }
+  .f-intro { display: grid; gap: var(--space-s); }
+  .small { font-size: 0.925rem; }
+  .card { padding: clamp(1.25rem, 1rem + 2vw, 2.5rem); border-radius: var(--radius-lg); background: oklch(0.995 0.003 85); box-shadow: var(--shadow-soft); }
+  .card .btn { justify-self: start; }
+  .more { margin-top: var(--space-m); }
+</style>

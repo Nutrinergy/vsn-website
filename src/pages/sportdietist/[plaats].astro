@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import DietistCard from '../../components/DietistCard.astro';
+import FinderSearch from '../../components/FinderSearch.astro';
+import { breadcrumbs, webPage, faq } from '../../lib/schema';
+import { cityPages } from '../../lib/cities';
+import { KENNISBANK_CATEGORIES } from '../../consts';
+
+export function getStaticPaths() {
+  const all = cityPages();
+  return all.map((c) => ({ params: { plaats: c.slug }, props: { c, all } }));
+}
+const { c, all } = Astro.props;
+const path = `/sportdietist/${c.slug}/`;
+const n = c.inCity;
+const nearbyCities = [...new Set(c.nearby.flatMap((r) => r.p.locations.map((l) => l.city)))].filter((x) => x !== c.city).slice(0, 6);
+const title = `Sportdiëtist in ${c.city}`;
+const seoTitle = `Sportdiëtist ${c.city} (${n + c.nearby.length} in de regio)`;
+const description = `Op zoek naar een sportdiëtist in ${c.city}? ${n === 1 ? 'Eén VSN-sportdiëtist heeft' : `${n} VSN-sportdiëtisten hebben`} hier een praktijk${c.nearby.length ? `, en ${c.nearby.length} meer in de omgeving` : ''}. Bekijk expertise en adres.`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Wat doet een sportdiëtist?', href: '/sportdietist/' }, { name: c.city, href: path }];
+const qa = [
+  { q: `Hoe vind ik een goede sportdiëtist in ${c.city}?`, a: `Alle sportdiëtisten op deze pagina zijn lid van de Vereniging Sportvoedingsexperts Nederland. Ze hebben de post-HBO opleiding Sportdiëtetiek of een vergelijkbare internationale opleiding gevolgd. Kies iemand met expertise die past bij jouw sport of doel, bijvoorbeeld duursport, krachtsport of jeugdsport.` },
+  { q: 'Wat is het verschil tussen een diëtist en een sportdiëtist?', a: 'Een sportdiëtist heeft na de HBO-opleiding Voeding en Diëtetiek een post-HBO opleiding Sportdiëtetiek gevolgd. Daardoor heeft een sportdiëtist specifieke kennis van inspanningsfysiologie, trainingsschema’s en sportspecifieke omstandigheden.' },
+  { q: 'Wordt een sportdiëtist vergoed?', a: 'Dat verschilt per zorgverzekeraar, per polis en per situatie. Vraag het na bij je verzekeraar of bij de sportdiëtist zelf.' },
+];
+const otherCities = all.filter((x) => x.slug !== c.slug && x.inCity >= 2).slice(0, 30);
+---
+<Base title={seoTitle} {description} schema={[webPage({ path, title: seoTitle, description }), breadcrumbs(crumbs), faq(qa)]}>
+  <PageHero {crumbs} kicker={`${n + c.nearby.length} sportdiëtisten in de regio`} {title} lead={`${n === 1 ? 'Eén sportdiëtist' : `${n} sportdiëtisten`} van de VSN ${n === 1 ? 'heeft' : 'hebben'} een praktijk in ${c.city}.${c.nearby.length ? ` In de omgeving${nearbyCities.length ? `, zoals ${nearbyCities.slice(0, 3).join(', ')},` : ''} vind je er nog ${c.nearby.length}.` : ''}`}>
+    <FinderSearch id="city-q" />
+  </PageHero>
+
+  <section class="section section--tight">
+    <div class="wrap cols">
+      <div>
+        <h2 class="h3">In {c.city}</h2>
+        <ul class="people" role="list">{c.people.map((p) => <DietistCard {p} />)}</ul>
+        {c.nearby.length > 0 && (
+          <>
+            <h2 class="h3 mt">In de omgeving van {c.city}</h2>
+            <ul class="people" role="list">
+              {c.nearby.map((r) => <DietistCard p={r.p} distanceKm={r.d} />)}
+            </ul>
+          </>
+        )}
+      </div>
+      <aside class="side">
+        <div class="box">
+          <h2 class="h3">Wat doet een sportdiëtist?</h2>
+          <p>Een sportdiëtist stelt samen met jou een voedingsplan op dat past bij je sport, trainingsschema, doelen en smaak. Van wedstrijdvoeding en herstel tot lichaamssamenstelling en maag-darmklachten tijdens inspanning.</p>
+          <a class="link-arrow" href="/sportdietist/">Meer over de sportdiëtist <span class="arrow" aria-hidden="true">→</span></a>
+        </div>
+        <div class="box box--tint">
+          <h2 class="h3">Alvast lezen</h2>
+          <ul role="list">
+            <li><a href="/sportvoedingspiramide/">De sportvoedingspiramide</a></li>
+            <li><a href="/voeding-en-sport/voeding-en-herstel/">Voeding en herstel</a></li>
+            <li><a href="/kennisbank/">Kennisbank ({Object.keys(KENNISBANK_CATEGORIES).length} onderwerpen)</a></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--paper2 section--tight" aria-labelledby="faq">
+    <div class="wrap--narrow">
+      <h2 id="faq" class="h3">Veelgestelde vragen</h2>
+      <div class="faq">
+        {qa.map((x) => <details><summary>{x.q}</summary><p>{x.a}</p></details>)}
+      </div>
+      {otherCities.length > 0 && (
+        <>
+          <h2 class="h3 mt">Andere plaatsen</h2>
+          <p class="others">{otherCities.map((x, i) => <><a href={`/sportdietist/${x.slug}/`}>{x.city}</a>{i < otherCities.length - 1 ? ' · ' : ''}</>)}</p>
+          <p><a class="link-arrow" href="/zoek-een-sport-dietist-in-de-buurt/">Alle sportdiëtisten op de kaart <span class="arrow" aria-hidden="true">→</span></a></p>
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+<style>
+  .cols { display: grid; gap: var(--space-xl); }
+  @media (min-width: 62rem) { .cols { grid-template-columns: minmax(0, 1fr) 21rem; } .side { position: sticky; top: 6.5rem; align-self: start; } }
+  .people { list-style: none; padding: 0; display: grid; gap: 0.75rem; margin-top: var(--space-s); }
+  .mt { margin-top: var(--space-l); }
+  .side { display: grid; gap: var(--space-s); }
+  .box { display: grid; gap: 0.7rem; padding: var(--space-m); border-radius: var(--radius-lg); box-shadow: 0 0 0 1px var(--line); background: oklch(0.99 0.004 85); }
+  .box h2 { font-size: 1.3rem; }
+  .box p { font-size: 0.975rem; color: var(--ink-2); }
+  .box--tint { background: var(--teal-tint); box-shadow: none; }
+  .box ul { padding-left: 1.1rem; display: grid; gap: 0.3rem; }
+  .others { line-height: 2; margin-block: var(--space-s); }
+</style>

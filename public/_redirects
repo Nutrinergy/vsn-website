@@ -1,0 +1,33 @@
+# 301-redirects oude WordPress-site -> nieuwe site (Netlify/Cloudflare Pages-formaat)
+# Ledenportaal verhuist naar leden.sportdietetiek.nl (zie README)
+/services/                                                             /                                                                      301
+/stijl/                                                                /                                                                      301
+/onze-dietisten/                                                       /zoek-een-sport-dietist-in-de-buurt/                                   301
+/news-feed/*                                                           https://leden.sportdietetiek.nl/news-feed/:splat                       301
+/leden/*                                                               https://leden.sportdietetiek.nl/leden/:splat                           301
+/groepen/*                                                             https://leden.sportdietetiek.nl/groepen/:splat                         301
+/forums/*                                                              https://leden.sportdietetiek.nl/forums/:splat                          301
+/topics/*                                                              https://leden.sportdietetiek.nl/topics/:splat                          301
+/fotos/*                                                               https://leden.sportdietetiek.nl/fotos/:splat                           301
+/documenten/*                                                          https://leden.sportdietetiek.nl/documenten/:splat                      301
+/videos/*                                                              https://leden.sportdietetiek.nl/videos/:splat                          301
+/dashboard/*                                                           https://leden.sportdietetiek.nl/dashboard/:splat                       301
+/login/*                                                               https://leden.sportdietetiek.nl/login/                                 301
+/wp-login.php                                                          https://leden.sportdietetiek.nl/wp-login.php                           301
+/register/*                                                            /lid-worden/                                                           301
+/activate/*                                                            https://leden.sportdietetiek.nl/activate/:splat                        301
+/agenda-item-maken/                                                    https://leden.sportdietetiek.nl/agenda-item-maken/                     301
+/blogpost-maken/                                                       https://leden.sportdietetiek.nl/blogpost-maken/                        301
+/aanmelden-vsn-alv/                                                    https://leden.sportdietetiek.nl/aanmelden-vsn-alv/                     301
+/aanmelden-vsn-masterclass/                                            https://leden.sportdietetiek.nl/aanmelden-vsn-masterclass/             301
+/aanmelden-vsn-studiedag/*                                             https://leden.sportdietetiek.nl/aanmelden-vsn-studiedag/:splat         301
+/agenda/vsn-bestuursvergadering/                                       /agenda/                                                               301
+/agenda/vsn-bestuursvergadering-2/                                     /agenda/                                                               301
+/category/agenda/*                                                     /agenda/                                                               301
+/category/kennisbank/basisvoeding/                                     /kennisbank/basisvoeding/                                              301
+/category/kennisbank/sport/                                            /kennisbank/sport/                                                     301
+/category/kennisbank/recepten/*                                        /kennisbank/recepten/                                                  301
+/category/kennisbank/voeding-en-herstel/                               /voeding-en-sport/voeding-en-herstel/                                  301
+/category/kennisbank/*                                                 /kennisbank/                                                           301
+/author/*                                                              /kennisbank/                                                           301
+/feed/*                                                                /kennisbank/                                                           301

@@ -1,0 +1,59 @@
+---
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { graph, organization, website } from '../lib/schema';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  schema?: object[];
+  published?: Date;
+  updated?: Date;
+  preloadImage?: string;
+}
+const { schema = [], preloadImage, ...seo } = Astro.props;
+const ld = graph(organization(), website(), ...schema);
+---
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
+    <Seo {...seo} schema={ld} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#F9F6F1" />
+    <meta name="format-detection" content="telephone=no" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Direct naar de inhoud</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      const els = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      if ('IntersectionObserver' in window && els.length) {
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }),
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
+        );
+        els.forEach((el) => io.observe(el));
+      } else {
+        els.forEach((el) => el.classList.add('is-in'));
+      }
+    </script>
+  </body>
+</html>

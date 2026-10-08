@@ -1,0 +1,16 @@
+---
+import logo from '../assets/brand/logo-vsn.svg?raw';
+import logoDark from '../assets/brand/logo-vsn-dark.svg?raw';
+interface Props { variant?: 'default' | 'dark'; class?: string; }
+const { variant = 'default', class: cls = '' } = Astro.props;
+const raw = (variant === 'dark' ? logoDark : logo)
+  .replace(/<\?xml[^>]*>/, '')
+  .replace(/<!--[\s\S]*?-->/g, '')
+  .replace(/id="Laag_1"/, '')
+  .replace('<svg', `<svg aria-hidden="true" focusable="false" class="logo-svg"`);
+---
+<span class:list={['logo', cls]} set:html={raw} />
+<style>
+  .logo { display: inline-block; line-height: 0; }
+  .logo :global(.logo-svg) { width: 100%; height: auto; }
+</style>

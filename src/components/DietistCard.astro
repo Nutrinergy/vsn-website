@@ -1,0 +1,58 @@
+---
+import { memberProfile } from '../consts';
+interface Loc { address: string; city: string; lat: number; lng: number }
+interface Props { p: { id: string; name: string; expertise: string; tags: string[]; locations: Loc[] }; headingLevel?: 'h2' | 'h3'; distanceKm?: number }
+const { p, headingLevel: H = 'h3', distanceKm } = Astro.props;
+const kmLabel = distanceKm === undefined ? '' : distanceKm < 10 ? `${distanceKm.toFixed(1).replace('.', ',')} km` : `${Math.round(distanceKm)} km`;
+const initials = p.name.split(/\s+/).filter((w) => /^[A-ZÀ-Ý]/.test(w)).map((w) => w[0]).slice(0, 2).join('') || p.name[0];
+const unavailable = /niet beschikbaar/i.test(p.expertise);
+---
+<li
+  class="dc"
+  data-person
+  data-name={p.name.toLowerCase()}
+  data-cities={p.locations.map((l) => l.city.toLowerCase()).join('|')}
+  data-tags={p.tags.join('|')}
+  data-locs={JSON.stringify(p.locations.map((l) => [l.lat, l.lng]))}
+  data-id={p.id}
+>
+  <span class="av" aria-hidden="true">{initials}</span>
+  <div class="main">
+    <H class="name">{p.name}</H>
+    <p class="exp">{p.expertise ? p.expertise : 'Sportdiëtist, lid VSN'}</p>
+    <ul class="locs" role="list">
+      {p.locations.map((l) => (
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span><strong>{l.city}</strong> <span class="addr">{l.address.replace(new RegExp(`,?\\s*\\d{4}\\s?[A-Z]{2}\\s+${l.city}$`), '')}</span></span>
+        </li>
+      ))}
+    </ul>
+    <div class="actions">
+      <a class="btn btn--small btn--teal" href={memberProfile(p.id)} rel="nofollow">Contact en profiel <span class="visually-hidden">van {p.name}</span></a>
+      <a class="link-arrow small" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.locations[0].address)}`} rel="noopener nofollow" target="_blank">Route <span class="visually-hidden">naar {p.name} (opent Google Maps)</span><span class="arrow" aria-hidden="true">↗</span></a>
+      <span class="dist" data-dist hidden={!kmLabel}>{kmLabel}</span>
+    </div>
+    {p.tags.length > 0 && <p class="tags">{p.tags.map((t) => <span class="tag tag--line">{t}</span>)}</p>}
+    {unavailable && <p class="tag tag--orange">Tijdelijk geen nieuwe cliënten</p>}
+  </div>
+</li>
+<style>
+  .dc { display: grid; grid-template-columns: auto 1fr; gap: 1rem; padding: var(--space-m); border-radius: var(--radius-m); background: oklch(0.99 0.004 85); box-shadow: 0 0 0 1px var(--line); transition: box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out); scroll-margin-top: 8rem; }
+  .dc:hover, .dc.is-active { box-shadow: 0 0 0 2px var(--teal), var(--shadow-soft); }
+  .dc[hidden] { display: none; }
+  .av { display: grid; place-items: center; width: 3.1rem; height: 3.1rem; border-radius: 50%; background: var(--teal-tint); color: var(--teal-ink); font-weight: 800; font-stretch: 118%; font-size: 1rem; }
+  .main { display: grid; gap: 0.5rem; min-width: 0; }
+  .name { font-size: 1.2rem; font-stretch: 110%; line-height: 1.2; }
+  .exp { font-size: 0.95rem; color: var(--ink-2); line-height: 1.45; }
+  .exp::first-letter { text-transform: uppercase; }
+  .locs { list-style: none; padding: 0; display: grid; gap: 0.25rem; font-size: 0.925rem; }
+  .locs li { display: flex; gap: 0.4rem; align-items: baseline; }
+  .locs svg { width: 0.95rem; flex: none; color: var(--orange-deep); transform: translateY(2px); }
+  .addr { color: var(--muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.6rem 1.1rem; align-items: center; margin-top: 0.25rem; }
+  .small { font-size: 0.925rem; }
+  .dist { margin-left: auto; font-weight: 750; font-stretch: 108%; font-size: 0.9rem; color: var(--teal-deep); font-variant-numeric: tabular-nums; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .tags .tag { font-size: 0.75rem; }
+</style>

@@ -1,0 +1,311 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Arcs from '../components/Arcs.astro';
+import FinderSearch from '../components/FinderSearch.astro';
+import Pyramid from '../components/Pyramid.astro';
+import NlMap from '../components/NlMap.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import EventRow from '../components/EventRow.astro';
+import { webPage } from '../lib/schema';
+import { isUpcoming, eventSortKey } from '../lib/format';
+import people from '../data/sportdietisten.json';
+
+import heroSport from '../assets/foto/wielrennen-peloton.jpg';
+import heroKennis from '../assets/foto/studiedag-vraag.jpg';
+import fotoSpreker from '../assets/foto/studiedag-spreker.jpg';
+import fotoZaal from '../assets/foto/studiedag-zaal.jpg';
+import fotoInteractie from '../assets/foto/studiedag-interactie.jpg';
+
+const topics = (await getCollection('onderwerpen')).sort((a, b) => a.data.order - b.data.order);
+const posts = (await getCollection('kennisbank')).sort((a, b) => +b.data.published - +a.data.published).slice(0, 3);
+const events = (await getCollection('agenda'))
+  .filter((e) => isUpcoming(e.data.start, e.data.end))
+  .sort((a, b) => eventSortKey(a.data.start) - eventSortKey(b.data.start) || +a.data.start - +b.data.start)
+  .slice(0, 3);
+
+const cities = [...new Set(people.flatMap((p) => p.locations.map((l) => l.city)))];
+const featuredCities = ['Amsterdam', 'Utrecht', 'Groningen', 'Nijmegen', 'Eindhoven', 'Zwolle', 'Den Haag', 'Enschede', 'Maastricht', 'Haarlem'].filter((c) => cities.includes(c));
+
+
+const title = 'Vereniging Sportvoedingsexperts Nederland | Vind een sportdiëtist';
+const description = `Vind een gecertificeerde sportdiëtist bij jou in de buurt. De VSN verbindt ${people.length} sportdiëtisten en sportvoedingsexperts en deelt betrouwbare kennis over sportvoeding.`;
+
+const benefits = [
+  { t: 'Een professioneel netwerk', d: 'Wissel vraagstukken, ervaringen en kennis uit met collega’s via de ledengroep, intervisie en verenigingsactiviteiten.' },
+  { t: 'Kennisdeling en verdieping', d: 'Jaarlijkse ALV, masterclass en studiedag met inspirerende sprekers. Plus korting op externe, ook internationale, scholingen.' },
+  { t: 'Een podium voor je expertise', d: 'Wij vergroten je zichtbaarheid bij sporters, teams en collega’s, onder meer via de landelijke kaart op deze site.' },
+  { t: 'Kwaliteit via het SCAS-register', d: 'Laat sporters, coaches en zorgprofessionals zien dat je werkt volgens de hoogste standaarden.' },
+];
+const quotes = [
+  { q: 'Het VSN-lidmaatschap is voor mij waardevol door de kennis die wordt gedeeld en het kunnen sparren met mede-sportdiëtisten.', n: 'Leonie Lubbinge' },
+  { q: 'Door de lezingen, webinars en intervisies houd ik mijn kennis up-to-date. Dat is voor mij de belangrijkste meerwaarde.', n: 'Annelies van den Hoven' },
+  { q: 'Als lid doe ik ontzettend veel extra kennis op. Dat helpt bij de professionalisering van mijn werk. En het is fijn om een netwerk op te bouwen.', n: 'Myrthe Rebattu' },
+];
+---
+<Base {title} {description} schema={[webPage({ path: '/', title, description })]}>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="label hero-kicker">Vereniging Sportvoedingsexperts Nederland</p>
+        <h1 class="hero-title">
+          <span class="line">Sport</span>
+          <span class="line">verbeteren</span>
+          <span class="line">met&nbsp;<em>voeding.</em></span>
+        </h1>
+        <p class="lead">Vind een gecertificeerde sportdiëtist bij jou in de buurt. Of verdiep je in sportvoeding die wetenschappelijk klopt.</p>
+        <FinderSearch id="hero-q" size="l" />
+        <p class="hero-sub">
+          <a class="link-arrow" href="/sportdietist/">Wat doet een sportdiëtist? <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="link-arrow" href="/lid-worden/">Ik ben professional <span class="arrow" aria-hidden="true">→</span></a>
+        </p>
+      </div>
+      <div class="hero-media" aria-hidden="false">
+        <div class="hm-main">
+          <Image src={heroSport} alt="Wielrenners in een peloton tijdens een wedstrijd" widths={[480, 720, 900]} sizes="(min-width: 64rem) 40vw, 90vw" loading="eager" fetchpriority="high" format="webp" class="img-cover" style="object-position: 62% 50%" />
+        </div>
+        <div class="hm-sub">
+          <Image src={heroKennis} alt="Een deelnemer steekt haar hand op tijdens de VSN studiedag" widths={[320, 480]} sizes="(min-width: 64rem) 16vw, 40vw" class="img-cover" loading="eager" />
+        </div>
+        <Arcs class="hero-arcs" width={30} />
+        <p class="hm-chip"><span class="dot" aria-hidden="true"></span>{people.length} sportdiëtisten in {cities.length} plaatsen</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIRAMIDE -->
+  <section class="section section--paper2" aria-labelledby="pyr-title">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">Voor sporters</p>
+          <h2 id="pyr-title">Goede sportvoeding begint onderaan</h2>
+        </div>
+        <p class="lead">De VSN ontwikkelde de sportvoedingspiramide: eerst de basis op orde, dan pas sportvoeding en supplementen. Klik op een laag.</p>
+      </div>
+      <Pyramid />
+      <p class="pyr-more"><a class="btn btn--ghost" href="/sportvoedingspiramide/">Alles over de sportvoedingspiramide <span class="arrow" aria-hidden="true">→</span></a></p>
+    </div>
+  </section>
+
+  <!-- ONDERWERPEN -->
+  <section class="section" aria-labelledby="topics-title">
+    <div class="wrap topics-grid">
+      <div class="topics-head" data-reveal>
+        <p class="label">Voeding en sport</p>
+        <h2 id="topics-title">Zes onderwerpen, uitgelegd door sportdiëtisten</h2>
+        <p class="muted">Onafhankelijk, onderbouwd en zonder supplementenhype.</p>
+        <a class="link-arrow" href="/voeding-en-sport/">Naar het overzicht <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      <ol class="topics" role="list">
+        {topics.map((t, i) => (
+          <li data-reveal style={`--d:${i}`}>
+            <a href={`/voeding-en-sport/${t.id}/`} class="topic">
+              <span class="t-num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="t-body">
+                <span class="t-title">{t.data.title}</span>
+                <span class="t-desc">{t.data.teaser}</span>
+              </span>
+              <span class="t-img" aria-hidden="true"><Image src={t.data.image} alt="" width={240} height={240} class="img-cover" /></span>
+              <span class="t-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- KAART -->
+  <section class="section section--ink map-section" aria-labelledby="map-title">
+    <div class="wrap map-grid">
+      <div class="map-text" data-reveal>
+        <p class="label">Vind een sportdiëtist</p>
+        <h2 id="map-title">Van Den Helder tot Maastricht. Altijd een expert in de buurt.</h2>
+        <p class="lead">Elke stip is een praktijk van een VSN-sportdiëtist. Allemaal opgeleid in sportdiëtetiek, de meesten SCAS-geregistreerd.</p>
+        <FinderSearch id="map-q" tone="dark" />
+        <ul class="cities" role="list" aria-label="Populaire plaatsen">
+          {featuredCities.map((c) => <li><a href={`/zoek-een-sport-dietist-in-de-buurt/?q=${encodeURIComponent(c)}`}>{c}</a></li>)}
+        </ul>
+      </div>
+      <div class="map-vis" data-reveal style="--d:1">
+        <NlMap tone="dark" />
+      </div>
+    </div>
+  </section>
+
+  <!-- VOOR PROFESSIONALS -->
+  <section class="section pro" aria-labelledby="pro-title">
+    <div class="wrap">
+      <div class="pro-grid">
+        <div class="pro-photos" data-reveal>
+          <div class="pp pp-1"><Image src={fotoSpreker} alt="Spreker geeft een presentatie tijdens de VSN studiedag 2025" widths={[480, 800]} sizes="(min-width: 60rem) 30vw, 60vw" class="img-cover" /></div>
+          <div class="pp pp-2"><Image src={fotoInteractie} alt="Deelnemers in gesprek met een spreker tijdens de studiedag" widths={[360, 600]} sizes="(min-width: 60rem) 20vw, 40vw" class="img-cover" /></div>
+          <div class="pp pp-3"><Image src={fotoZaal} alt="Volle zaal leden tijdens de VSN studiedag in een oud pakhuis" widths={[480, 800]} sizes="(min-width: 60rem) 30vw, 60vw" class="img-cover" /></div>
+        </div>
+        <div class="pro-text">
+          <p class="label label--orange" data-reveal>Voor sportdiëtisten en sportvoedingsexperts</p>
+          <h2 id="pro-title" data-reveal>Samen sterk. Een vereniging vóór en dóór leden.</h2>
+          <p class="lead" data-reveal>We scholen bij, delen kennis, bewaken de kwaliteit van het vak en zetten sportvoeding op de kaart. Sinds 2004.</p>
+          <ol class="benefits" role="list">
+            {benefits.map((b, i) => (
+              <li data-reveal style={`--d:${i}`}>
+                <span class="b-n" aria-hidden="true">{i + 1}</span>
+                <div><h3>{b.t}</h3><p>{b.d}</p></div>
+              </li>
+            ))}
+          </ol>
+          <div class="btn-row" data-reveal>
+            <a class="btn" href="/lid-worden/">Word lid van de VSN <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn btn--ghost" href="/over-ons/">Over de vereniging</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="quotes" aria-label="Wat leden zeggen">
+        {quotes.map((q, i) => (
+          <figure class="quote" data-reveal style={`--d:${i}`}>
+            <blockquote><p>{q.q}</p></blockquote>
+            <figcaption><strong>{q.n}</strong><span>Sportdiëtist, lid VSN</span></figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- AGENDA + KENNISBANK -->
+  <section class="section section--paper2" aria-labelledby="agenda-title">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">Agenda</p>
+          <h2 id="agenda-title">Scholing en evenementen</h2>
+        </div>
+        <p><a class="link-arrow" href="/agenda/">Bekijk de volledige agenda <span class="arrow" aria-hidden="true">→</span></a></p>
+      </div>
+      {events.length ? (
+        <div class="events" data-reveal>{events.map((e) => <EventRow event={e} />)}</div>
+      ) : (
+        <p class="muted">Er staan op dit moment geen nieuwe evenementen gepland. Leden ontvangen uitnodigingen per e-mail.</p>
+      )}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="kb-title">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">Kennisbank</p>
+          <h2 id="kb-title">Lees verder, geschreven door sportdiëtisten</h2>
+        </div>
+        <p><a class="link-arrow" href="/kennisbank/">Alle artikelen <span class="arrow" aria-hidden="true">→</span></a></p>
+      </div>
+      <div class="cards">
+        {posts.map((p, i) => <div data-reveal style={`--d:${i}`}><ArticleCard post={p} /></div>)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* HERO */
+  .hero { position: relative; padding-block: clamp(1.5rem, 1rem + 3vw, 4rem) var(--space-xl); overflow: clip; }
+  .hero-grid { display: grid; gap: var(--space-xl); align-items: center; }
+  @media (min-width: 64rem) { .hero-grid { grid-template-columns: 1.08fr 0.92fr; gap: var(--space-l); } }
+  .hero-text { display: grid; gap: var(--space-m); justify-items: start; }
+  .hero-title { font-size: clamp(2.7rem, 0.9rem + 6.2vw, 6.4rem); line-height: 0.9; letter-spacing: -0.035em; font-weight: 880; }
+  .hero-title .line { display: block; }
+  .hero-title em { font-style: normal; color: var(--orange-display); }
+  .hero-title .line:nth-child(2) { color: var(--teal-deep); }
+  .hero .lead { max-width: 36ch; }
+  .hero-sub { display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    /* Titel en hoofdbeeld animeren alleen met transform (geen opacity), zodat LCP direct meetbaar blijft */
+    .hero-title .line { animation: rise 1s var(--ease-out) both; }
+    .hero-kicker, .hero .lead, .hero :global(.fsearch), .hero-sub { animation: up 1s var(--ease-out) both; }
+    .hero-title .line:nth-child(1) { animation-delay: 0.05s; }
+    .hero-title .line:nth-child(2) { animation-delay: 0.12s; }
+    .hero-title .line:nth-child(3) { animation-delay: 0.19s; }
+    .hero .lead { animation-delay: 0.3s; }
+    .hero :global(.fsearch) { animation-delay: 0.38s; }
+    .hero-sub { animation-delay: 0.46s; }
+    .hm-main { animation: settle 1.3s var(--ease-out) both; }
+    .hm-sub, .hm-chip { animation: fade 1.2s var(--ease-out) both; }
+    .hm-sub { animation-delay: 0.35s; }
+    .hm-chip { animation-delay: 0.7s; }
+  }
+  @keyframes up { from { opacity: 0; transform: translateY(28px); } }
+  @keyframes fade { from { opacity: 0; transform: scale(0.97); } }
+  @keyframes rise { from { transform: translateY(0.35em); } }
+  @keyframes settle { from { transform: scale(1.04); } }
+  .hero-title .line { overflow: hidden; padding-bottom: 0.04em; }
+
+  .hero-media { position: relative; aspect-ratio: 4 / 4.4; max-width: 38rem; width: 100%; justify-self: end; margin-right: clamp(0px, 3vw, 2rem); }
+  .hm-main { position: absolute; inset: 0 0 12% 14%; border-radius: 14rem 14rem var(--radius-lg) var(--radius-lg); overflow: hidden; }
+  .hm-sub { position: absolute; left: 0; bottom: 0; width: 42%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 6px solid var(--paper); }
+  .hero-media :global(.hero-arcs) { position: absolute; width: 34%; right: -9%; top: -7%; }
+  .hm-chip { position: absolute; right: 4%; bottom: 3%; display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.6rem 1rem; border-radius: var(--radius-pill); background: var(--ink); color: var(--paper); font-weight: 650; font-size: 0.925rem; font-stretch: 106%; box-shadow: var(--shadow-lift); }
+  .dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px oklch(0.7 0.17 57 / 0.3); }
+  @media (max-width: 63.99rem) { .hero-media { justify-self: center; margin: 0; max-width: 30rem; } }
+
+  /* PYRAMID */
+  .pyr-more { margin-top: var(--space-l); }
+
+  /* TOPICS */
+  .topics-grid { display: grid; gap: var(--space-l); }
+  @media (min-width: 60rem) { .topics-grid { grid-template-columns: 0.75fr 1.25fr; gap: var(--space-xl); } .topics-head { position: sticky; top: 7rem; align-self: start; } }
+  .topics-head { display: grid; gap: var(--space-s); justify-items: start; }
+  .topics { list-style: none; padding: 0; border-bottom: 1.5px solid var(--line); }
+  .topic { position: relative; display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-m); align-items: center; padding-block: var(--space-m); border-top: 1.5px solid var(--line); color: var(--ink); text-decoration: none; }
+  .t-num { font-weight: 800; font-stretch: 120%; font-size: 0.95rem; color: var(--orange-deep); font-variant-numeric: tabular-nums; }
+  .t-body { display: grid; gap: 0.2rem; }
+  .t-title { font-size: clamp(1.6rem, 1.1rem + 2vw, 2.6rem); font-weight: 800; font-stretch: 120%; letter-spacing: -0.02em; line-height: 1.05; transition: color 0.25s var(--ease-out), transform 0.4s var(--ease-out); }
+  .t-desc { color: var(--muted); font-size: 0.975rem; max-width: 52ch; }
+  .t-arrow { font-size: 1.6rem; color: var(--ink); transition: transform 0.3s var(--ease-out), color 0.3s var(--ease-out); }
+  .t-img { position: absolute; right: 3.5rem; top: 50%; width: 7.5rem; aspect-ratio: 1; border-radius: 50%; overflow: hidden; opacity: 0; transform: translateY(-50%) scale(0.6) rotate(-8deg); transition: opacity 0.35s var(--ease-out), transform 0.5s var(--ease-out); pointer-events: none; }
+  .topic:hover .t-title, .topic:focus-visible .t-title { color: var(--teal-deep); transform: translateX(6px); }
+  .topic:hover .t-arrow { transform: translateX(6px); color: var(--orange-deep); }
+  @media (hover: hover) and (min-width: 48rem) { .topic:hover .t-img { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); } }
+
+  /* MAP */
+  .map-section { overflow: hidden; }
+  .map-grid { display: grid; gap: var(--space-l); align-items: center; }
+  @media (min-width: 60rem) { .map-grid { grid-template-columns: 1fr 1fr; gap: var(--space-xl); } }
+  .map-text { display: grid; gap: var(--space-m); justify-items: start; }
+  .map-text h2 { max-width: 16ch; }
+  .cities { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
+  .cities a { display: inline-block; padding: 0.4rem 0.9rem; border-radius: var(--radius-pill); box-shadow: inset 0 0 0 1.5px oklch(0.975 0.008 85 / 0.25); color: var(--paper); text-decoration: none; font-size: 0.925rem; font-weight: 550; transition: background-color 0.2s var(--ease-out), color 0.2s; }
+  .cities a:hover { background: var(--orange); color: var(--ink); box-shadow: none; }
+  .map-vis { max-width: 34rem; width: 100%; justify-self: center; }
+
+  /* PRO */
+  .pro-grid { display: grid; gap: var(--space-xl); align-items: center; }
+  @media (min-width: 60rem) { .pro-grid { grid-template-columns: 0.95fr 1.05fr; } }
+  .pro-photos { position: relative; aspect-ratio: 1 / 1.05; }
+  .pp { position: absolute; overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-lift); }
+  .pp-1 { inset: 0 22% 34% 0; }
+  .pp-2 { width: 44%; aspect-ratio: 1; right: 0; top: 18%; border-radius: 50%; border: 6px solid var(--paper); }
+  .pp-3 { inset: 58% 8% 0 12%; }
+  .pro-text { display: grid; gap: var(--space-m); justify-items: start; }
+  .pro-text h2 { max-width: 15ch; }
+  .benefits { list-style: none; padding: 0; display: grid; gap: var(--space-m); margin-block: var(--space-xs); }
+  @media (min-width: 40rem) { .benefits { grid-template-columns: 1fr 1fr; } }
+  .benefits li { display: grid; grid-template-columns: auto 1fr; gap: 0.9rem; }
+  .b-n { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--teal-tint); color: var(--teal-ink); font-weight: 800; font-stretch: 120%; }
+  .benefits h3 { font-size: 1.1rem; font-stretch: 108%; margin-bottom: 0.25rem; }
+  .benefits p { font-size: 0.975rem; color: var(--ink-2); line-height: 1.5; }
+  .quotes { display: grid; gap: var(--space-s); margin-top: var(--space-2xl); }
+  @media (min-width: 56rem) { .quotes { grid-template-columns: 1.3fr 1fr 1fr; } }
+  .quote { display: grid; gap: var(--space-m); align-content: space-between; padding: var(--space-l) var(--space-m) var(--space-m); border-radius: var(--radius-lg); background: var(--teal-tint); }
+  .quote:first-child { background: var(--teal-ink); color: var(--paper); }
+  .quote blockquote p { font-size: 1.15rem; font-weight: 550; font-stretch: 104%; line-height: 1.45; text-wrap: pretty; }
+  .quote:first-child blockquote p { font-size: clamp(1.25rem, 1rem + 0.9vw, 1.6rem); font-weight: 600; }
+  .quote blockquote p::before { content: '“'; display: block; font-size: 3.5rem; line-height: 0.6; font-weight: 900; color: var(--orange); margin-bottom: 0.6rem; }
+  .quote figcaption { display: grid; font-size: 0.925rem; }
+  .quote figcaption span { color: var(--muted); }
+  .quote:first-child figcaption span { color: oklch(0.82 0.03 195); }
+
+  .events { border-bottom: 1.5px solid var(--line); }
+  .cards { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+</style>

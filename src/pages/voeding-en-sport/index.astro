@@ -1,0 +1,63 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Pyramid from '../../components/Pyramid.astro';
+import TwoDoors from '../../components/TwoDoors.astro';
+import { breadcrumbs, webPage } from '../../lib/schema';
+
+const topics = (await getCollection('onderwerpen')).sort((a, b) => a.data.order - b.data.order);
+const title = 'Voeding en sport: betrouwbare uitleg van sportdiëtisten';
+const description = 'Basisvoeding, voeding per sport, herstel, supplementen, maatwerk en recepten. Onafhankelijke uitleg van de sportdiëtisten van de VSN.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Voeding en sport', href: '/voeding-en-sport/' }];
+---
+<Base {title} {description} schema={[webPage({ path: '/voeding-en-sport/', title, description, type: 'CollectionPage' }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} kicker="Voor sporters" title="Voeding en sport" lead="Goede sportvoeding is gebouwd op een goede basis. Onze sportdiëtisten werken volgens de door de VSN ontwikkelde sportvoedingspiramide: eerst de basis, dan sportspecifieke voeding, en pas daarna supplementen." />
+
+  <section class="section section--tight">
+    <div class="wrap">
+      <ul class="grid" role="list">
+        {topics.map((t, i) => (
+          <li class:list={['tile', `tile--${i}`]} data-reveal style={`--d:${i % 3}`}>
+            <a href={`/voeding-en-sport/${t.id}/`}>
+              <span class="img"><Image src={t.data.image} alt="" widths={[400, 640, 900]} sizes="(min-width: 64rem) 40vw, 92vw" class="img-cover" /></span>
+              <span class="txt">
+                <span class="num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="t">{t.data.title}</span>
+                <span class="d">{t.data.teaser}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--paper2" aria-labelledby="pyr">
+    <div class="wrap">
+      <div class="section-head"><p class="label">Het principe</p><h2 id="pyr">De VSN sportvoedingspiramide</h2></div>
+      <Pyramid />
+    </div>
+  </section>
+  <TwoDoors />
+</Base>
+<style>
+  .grid { list-style: none; padding: 0; display: grid; gap: var(--space-s); grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+  @media (min-width: 64rem) {
+    .grid { grid-template-columns: repeat(6, 1fr); }
+    .tile--0, .tile--1 { grid-column: span 3; }
+    .tile--2, .tile--3, .tile--4 { grid-column: span 2; }
+    .tile--5 { grid-column: span 6; }
+    .tile--5 a { aspect-ratio: 3 / 1; }
+  }
+  .tile a { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--radius-lg); overflow: hidden; color: var(--paper); text-decoration: none; isolation: isolate; }
+  .img { position: absolute; inset: 0; z-index: -2; }
+  .img :global(img) { transition: transform 1s var(--ease-out); }
+  .tile a::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, oklch(0.24 0.035 205 / 0) 30%, oklch(0.24 0.035 205 / 0.88) 100%); }
+  .tile a:hover .img :global(img) { transform: scale(1.05); }
+  .txt { position: absolute; inset: auto 0 0 0; display: grid; gap: 0.3rem; padding: var(--space-m); }
+  .num { font-weight: 800; font-stretch: 120%; color: var(--orange); font-size: 0.95rem; }
+  .t { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem); font-weight: 850; font-stretch: 122%; letter-spacing: -0.02em; line-height: 1; }
+  .d { max-width: 40ch; font-size: 0.975rem; color: oklch(0.92 0.015 200); }
+</style>

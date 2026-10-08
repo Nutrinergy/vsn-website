@@ -1,0 +1,41 @@
+---
+import FinderSearch from './FinderSearch.astro';
+import Arcs from './Arcs.astro';
+import people from '../data/sportdietisten.json';
+---
+<section class="doors" aria-labelledby="doors-a doors-b">
+  <div class="wrap grid">
+    <div class="door door--a" data-reveal>
+      <p class="label label--orange">Voor sporters</p>
+      <h2 id="doors-a" class="h3">Advies op maat van iemand die jouw sport snapt</h2>
+      <p>{people.length} gecertificeerde sportdiëtisten in heel Nederland. Zoek op plaats of postcode.</p>
+      <FinderSearch id="doors-q" />
+    </div>
+    <div class="door door--b" data-reveal style="--d:1">
+      <Arcs class="door-arcs" tone="light" animate={false} width={30} />
+      <p class="label">Voor professionals</p>
+      <h2 id="doors-b" class="h3">Sportdiëtist of sportvoedingsexpert? Sluit je aan.</h2>
+      <p>Bijscholing, intervisie, een sterk netwerk en vindbaarheid via onze kaart.</p>
+      <div class="btn-row">
+        <a class="btn" href="/lid-worden/">Word lid <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="/over-ons/">Over de VSN</a>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  .doors { padding-block: var(--space-xl); }
+  .grid { display: grid; gap: var(--space-s); }
+  @media (min-width: 56rem) { .grid { grid-template-columns: 1fr 1fr; } }
+  .door { position: relative; overflow: hidden; display: grid; gap: var(--space-s); align-content: start; padding: clamp(1.5rem, 1rem + 3vw, 3.25rem); border-radius: var(--radius-lg); }
+  .door--a { background: var(--orange-tint); }
+  .door--b { background: var(--ink); color: oklch(0.86 0.02 200); }
+  .door--b h2 { color: var(--paper); max-width: 18ch; }
+  .door--b .label { color: var(--teal); }
+  .door--b .btn--ghost { --btn-fg: var(--paper); border-color: oklch(0.975 0.008 85 / 0.5); }
+  .door--b .btn--ghost:hover { background: var(--paper); color: var(--ink); }
+  .door h2 { max-width: 20ch; }
+  .door p:not(.label) { max-width: 44ch; }
+  .door :global(.door-arcs) { position: absolute; width: 190px; right: -50px; bottom: -70px; }
+  .door > :not(:global(.door-arcs)) { position: relative; }
+</style>

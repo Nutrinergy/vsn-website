@@ -1,0 +1,35 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { KENNISBANK_CATEGORIES } from '../consts';
+import { formatDate } from '../lib/format';
+interface Props { post: CollectionEntry<'kennisbank'>; headingLevel?: 'h2' | 'h3'; eager?: boolean }
+const { post, headingLevel: H = 'h3', eager = false } = Astro.props;
+const href = `/kennisbank/${post.data.category}/${post.id}/`;
+---
+<article class="card">
+  <div class="thumb">
+    <Image src={post.data.image} alt="" widths={[400, 640, 800]} sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 92vw" class="img-cover" loading={eager ? 'eager' : 'lazy'} />
+  </div>
+  <div class="body">
+    <p class="meta"><span class="tag">{KENNISBANK_CATEGORIES[post.data.category].label}</span><span class="muted">{post.data.author}</span></p>
+    <H class="title"><a href={href}>{post.data.title}</a></H>
+    <p class="desc">{post.data.description}</p>
+    <p class="date muted"><time datetime={post.data.published.toISOString().slice(0, 10)}>{formatDate(post.data.published)}</time></p>
+  </div>
+</article>
+<style>
+  .card { position: relative; display: grid; grid-template-rows: auto 1fr; border-radius: var(--radius-lg); background: oklch(0.99 0.004 85); box-shadow: 0 0 0 1px var(--line); overflow: hidden; transition: box-shadow 0.3s var(--ease-out), transform 0.3s var(--ease-out); }
+  .card:hover { box-shadow: var(--shadow-lift), 0 0 0 1px var(--line); transform: translateY(-3px); }
+  .thumb { aspect-ratio: 16 / 10; overflow: hidden; }
+  .thumb :global(img) { transition: transform 0.8s var(--ease-out); }
+  .card:hover .thumb :global(img) { transform: scale(1.04); }
+  .body { display: grid; gap: 0.6rem; align-content: start; padding: var(--space-m); }
+  .meta { display: flex; gap: 0.75rem; align-items: center; font-size: 0.875rem; flex-wrap: wrap; }
+  .title { font-size: 1.3rem; line-height: 1.2; font-stretch: 108%; }
+  .title a { color: var(--ink); text-decoration: none; }
+  .title a::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+  .card:hover .title a { text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 2px; }
+  .desc { font-size: 0.975rem; color: var(--ink-2); line-height: 1.5; }
+  .date { font-size: 0.85rem; }
+</style>

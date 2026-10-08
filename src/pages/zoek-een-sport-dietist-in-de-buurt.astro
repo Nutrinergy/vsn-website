@@ -1,0 +1,341 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import DietistCard from '../components/DietistCard.astro';
+import Arcs from '../components/Arcs.astro';
+import people from '../data/sportdietisten.json';
+import { breadcrumbs, webPage } from '../lib/schema';
+import { citySlug, cityPages } from '../lib/cities';
+
+const tags = ['Duursport', 'Krachtsport', 'Teamsport', 'Jeugdsport', 'Eetproblematiek', 'Gewicht & lichaamssamenstelling', 'Medisch'];
+const nLocs = people.reduce((n, p) => n + p.locations.length, 0);
+const title = 'Zoek een sportdiëtist bij jou in de buurt';
+const description = `Vind een sportdiëtist bij jou in de buurt. Zoek op plaats of postcode tussen ${people.length} sportdiëtisten van de VSN en filter op expertise, zoals duursport.`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Zoek een sportdiëtist', href: '/zoek-een-sport-dietist-in-de-buurt/' }];
+const cities = cityPages();
+const list = {
+  '@type': 'ItemList',
+  name: 'Sportdiëtisten van de VSN',
+  numberOfItems: people.length,
+  itemListElement: people.map((p, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Person',
+      name: p.name,
+      jobTitle: 'Sportdiëtist',
+      memberOf: { '@id': 'https://sportdietetiek.nl/#organization' },
+      ...(p.expertise ? { knowsAbout: p.expertise } : {}),
+      workLocation: p.locations.map((l) => ({ '@type': 'Place', address: { '@type': 'PostalAddress', streetAddress: l.address.split(',')[0], addressLocality: l.city, addressCountry: 'NL' } })),
+    },
+  })),
+};
+---
+<Base {title} {description} schema={[webPage({ path: '/zoek-een-sport-dietist-in-de-buurt/', title, description, type: 'SearchResultsPage' }), breadcrumbs(crumbs), list]}>
+  <section class="f-hero">
+    <Arcs class="f-arcs" width={28} />
+    <div class="wrap">
+      <Breadcrumbs items={crumbs} />
+      <h1>Zoek een sportdiëtist bij jou in de buurt</h1>
+      <p class="lead">{people.length} sportdiëtisten op {nLocs} locaties. Allemaal lid van de VSN en opgeleid in sportdiëtetiek.</p>
+
+      <form class="finder" role="search" data-finder-form action="/zoek-een-sport-dietist-in-de-buurt/" method="get">
+        <div class="f-row">
+          <label for="f-q" class="visually-hidden">Plaats, postcode of naam</label>
+          <div class="f-input">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.4" fill="currentColor"/></svg>
+            <input id="f-q" name="q" type="search" placeholder="Plaats, postcode of naam" autocomplete="off" enterkeyhint="search" />
+          </div>
+          <button class="btn" type="submit">Zoeken</button>
+          <button class="btn btn--ghost geo" type="button" data-geo hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Mijn locatie
+          </button>
+        </div>
+        <fieldset class="f-tags">
+          <legend class="visually-hidden">Filter op expertise</legend>
+          {tags.map((t) => (
+            <label class="chip"><input type="checkbox" name="expertise" value={t} /><span>{t}</span></label>
+          ))}
+        </fieldset>
+      </form>
+    </div>
+  </section>
+
+  <section class="results-wrap">
+    <div class="wrap view-toggle" role="group" aria-label="Weergave" data-view hidden>
+      <button type="button" aria-pressed="true" data-v="list">Lijst</button>
+      <button type="button" aria-pressed="false" data-v="map">Kaart</button>
+    </div>
+    <div class="wrap results" data-results>
+      <div class="list-col">
+        <div class="status" role="status" aria-live="polite" data-status>
+          Alle {people.length} sportdiëtisten, op achternaam
+        </div>
+        <ul class="people" role="list" data-list>
+          {people.map((p) => <DietistCard {p} headingLevel="h2" />)}
+        </ul>
+        <p class="none" data-none hidden>Geen sportdiëtisten gevonden met deze filters. <button type="button" class="linkbtn" data-reset>Wis de filters</button></p>
+      </div>
+      <div class="map-col">
+        <div class="map" id="map" data-map aria-label="Kaart met praktijklocaties" role="region">
+          <noscript><p class="nomap">Zet JavaScript aan om de kaart te bekijken.</p></noscript>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--paper2 section--tight" aria-labelledby="plaatsen">
+    <div class="wrap">
+      <h2 id="plaatsen" class="h3">Sportdiëtist per plaats</h2>
+      <ul class="city-links" role="list">
+        {cities.map((c) => <li><a href={`/sportdietist/${citySlug(c.city)}/`}>Sportdiëtist {c.city} <span>{c.inCity}</span></a></li>)}
+      </ul>
+      <p class="muted info">Sta je als VSN-lid niet (goed) op de kaart? Werk je praktijkadres en expertise bij in je profiel op het ledenportaal.</p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  type Person = { el: HTMLElement; name: string; cities: string; tags: string[]; locs: [number, number][]; dist: number };
+  const form = document.querySelector<HTMLFormElement>('[data-finder-form]')!;
+  const input = form.querySelector<HTMLInputElement>('#f-q')!;
+  const listEl = document.querySelector<HTMLElement>('[data-list]')!;
+  const status = document.querySelector<HTMLElement>('[data-status]')!;
+  const none = document.querySelector<HTMLElement>('[data-none]')!;
+  const geoBtn = document.querySelector<HTMLButtonElement>('[data-geo]')!;
+  const people: Person[] = Array.from(listEl.querySelectorAll<HTMLElement>('[data-person]')).map((el) => ({
+    el,
+    name: el.dataset.name ?? '',
+    cities: el.dataset.cities ?? '',
+    tags: (el.dataset.tags ?? '').split('|').filter(Boolean),
+    locs: JSON.parse(el.dataset.locs ?? '[]'),
+    dist: Infinity,
+  }));
+  const original = people.slice();
+  let origin: { lat: number; lng: number; label: string } | null = null;
+  let textFilter = '';
+
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const km = (a: [number, number], b: [number, number]) => {
+    const dLat = toRad(b[0] - a[0]);
+    const dLng = toRad(b[1] - a[1]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(h));
+  };
+  const activeTags = () => Array.from(form.querySelectorAll<HTMLInputElement>('input[name="expertise"]:checked')).map((i) => i.value);
+
+  function render() {
+    const tags = activeTags();
+    let shown = 0;
+    const ordered = origin ? people.slice().sort((a, b) => a.dist - b.dist) : original;
+    ordered.forEach((p) => {
+      const tagOk = !tags.length || tags.some((t) => p.tags.includes(t));
+      const textOk = !textFilter || p.name.includes(textFilter) || p.cities.includes(textFilter);
+      const vis = tagOk && textOk;
+      p.el.hidden = !vis;
+      if (vis) shown++;
+      const d = p.el.querySelector<HTMLElement>('[data-dist]')!;
+      if (origin && isFinite(p.dist)) { d.hidden = false; d.textContent = p.dist < 10 ? `${p.dist.toFixed(1).replace('.', ',')} km` : `${Math.round(p.dist)} km`; }
+      else d.hidden = true;
+      listEl.appendChild(p.el);
+    });
+    none.hidden = shown > 0;
+    const tagTxt = tags.length ? ` met expertise ${tags.join(' of ').toLowerCase()}` : '';
+    status.textContent = origin
+      ? `${shown} sportdiëtisten${tagTxt}, dichtstbijzijnde eerst vanaf ${origin.label}`
+      : textFilter
+        ? `${shown} resultaten voor “${input.value}”${tagTxt}`
+        : `${shown} sportdiëtisten${tagTxt}, op achternaam`;
+    updateMap();
+  }
+
+  async function geocode(q: string) {
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?rows=1&fl=weergavenaam,centroide_ll,type&fq=type:(woonplaats OR postcode OR gemeente OR adres)&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('geocode');
+    const doc = (await res.json()).response?.docs?.[0];
+    if (!doc) return null;
+    const m = /POINT\(([\d.]+) ([\d.]+)\)/.exec(doc.centroide_ll);
+    return m ? { lat: +m[2], lng: +m[1], label: (doc.weergavenaam as string).replace(/^Gemeente /, '') } : null;
+  }
+
+  function setOrigin(o: typeof origin) {
+    origin = o;
+    people.forEach((p) => (p.dist = o ? Math.min(...p.locs.map((l) => km([o.lat, o.lng], l))) : Infinity));
+  }
+
+  async function search(q: string, push = true) {
+    q = q.trim();
+    textFilter = '';
+    setOrigin(null);
+    if (q) {
+      const lower = q.toLowerCase();
+      const nameHit = people.some((p) => p.name.includes(lower));
+      const looksLikePlace = /\d{4}/.test(q) || !nameHit;
+      if (looksLikePlace) {
+        status.textContent = `Zoeken naar ${q}…`;
+        try {
+          const o = await geocode(q);
+          if (o) setOrigin(o);
+          else textFilter = lower;
+        } catch {
+          textFilter = lower;
+        }
+      } else textFilter = lower;
+    }
+    if (push) {
+      const u = new URL(location.href);
+      q ? u.searchParams.set('q', q) : u.searchParams.delete('q');
+      history.replaceState(null, '', u);
+    }
+    render();
+    if (origin) fitToNearest();
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); search(input.value); });
+  form.addEventListener('change', (e) => { if ((e.target as HTMLInputElement).name === 'expertise') render(); });
+  document.querySelector('[data-reset]')?.addEventListener('click', () => {
+    form.querySelectorAll<HTMLInputElement>('input[name="expertise"]').forEach((i) => (i.checked = false));
+    input.value = '';
+    search('');
+  });
+
+  if ('geolocation' in navigator) {
+    geoBtn.hidden = false;
+    geoBtn.addEventListener('click', () => {
+      status.textContent = 'Locatie bepalen…';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { input.value = ''; textFilter = ''; setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'jouw locatie' }); render(); fitToNearest(); },
+        () => { status.textContent = 'Je locatie kon niet worden bepaald. Zoek op plaats of postcode.'; },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 },
+      );
+    });
+  }
+
+  // ---------- Kaart (Leaflet + PDOK BRT-achtergrondkaart pastel), pas laden als hij in beeld komt ----------
+  let map: any = null;
+  let L: any = null;
+  let layer: any = null;
+  let originMarker: any = null;
+  const markers = new Map<HTMLElement, any[]>();
+  const mapEl = document.querySelector<HTMLElement>('[data-map]')!;
+
+  async function initMap() {
+    if (map) return;
+    const [mod] = await Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css')]);
+    L = mod.default ?? mod;
+    map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: true, attributionControl: true }).setView([52.2, 5.3], 7);
+    L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/pastel/EPSG:3857/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      minZoom: 6,
+      attribution: 'Kaart: <a href="https://www.pdok.nl/" target="_blank" rel="noopener">PDOK</a> / Kadaster',
+    }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+    people.forEach((p) => {
+      const ms = p.locs.map((ll) => {
+        const m = L.circleMarker(ll, { radius: 7, weight: 2, color: '#F9F6F1', fillColor: '#EB7D00', fillOpacity: 1 });
+        m.bindTooltip(p.el.querySelector('.name')?.textContent ?? '', { direction: 'top', offset: [0, -6] });
+        m.on('click', () => {
+          people.forEach((x) => x.el.classList.remove('is-active'));
+          p.el.classList.add('is-active');
+          p.el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+        });
+        return m;
+      });
+      markers.set(p.el, ms);
+      p.el.addEventListener('mouseenter', () => ms.forEach((m) => m.setStyle({ fillColor: '#006C6D', radius: 9 })));
+      p.el.addEventListener('mouseleave', () => ms.forEach((m) => m.setStyle({ fillColor: '#EB7D00', radius: 7 })));
+    });
+    updateMap();
+    if (origin) fitToNearest();
+  }
+
+  function updateMap() {
+    if (!map) return;
+    layer.clearLayers();
+    people.forEach((p) => { if (!p.el.hidden) markers.get(p.el)?.forEach((m) => layer.addLayer(m)); });
+    if (originMarker) { originMarker.remove(); originMarker = null; }
+    if (origin) originMarker = L.circleMarker([origin.lat, origin.lng], { radius: 9, weight: 3, color: '#062427', fillColor: '#F9F6F1', fillOpacity: 1 }).addTo(map).bindTooltip(origin.label);
+  }
+
+  function fitToNearest() {
+    if (!map || !origin) return;
+    const near = people.filter((p) => !p.el.hidden).sort((a, b) => a.dist - b.dist).slice(0, 5);
+    const o: [number, number] = [origin.lat, origin.lng];
+    const pts: [number, number][] = [o, ...near.map((p) => p.locs.slice().sort((a, b) => km(o, a) - km(o, b))[0])];
+    map.fitBounds(pts, { padding: [40, 40], maxZoom: 12 });
+  }
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); initMap(); } }, { rootMargin: '200px' });
+    io.observe(mapEl);
+  } else initMap();
+
+  // Mobiel: wissel tussen lijst en kaart
+  const view = document.querySelector<HTMLElement>('[data-view]')!;
+  const results = document.querySelector<HTMLElement>('[data-results]')!;
+  const mq = matchMedia('(max-width: 63.99rem)');
+  const setView = (v: string) => {
+    results.dataset.mode = v;
+    view.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    if (v === 'map') { initMap().then(() => map?.invalidateSize()); }
+  };
+  const syncMq = () => { view.hidden = !mq.matches; if (mq.matches) setView(results.dataset.mode ?? 'list'); else delete results.dataset.mode; };
+  view.querySelectorAll<HTMLButtonElement>('button').forEach((b) => b.addEventListener('click', () => setView(b.dataset.v!)));
+  mq.addEventListener('change', syncMq);
+  syncMq();
+
+  const q0 = new URL(location.href).searchParams.get('q');
+  if (q0) { input.value = q0; search(q0, false); }
+</script>
+
+<style>
+  .f-hero { position: relative; overflow: hidden; padding-block: var(--space-l) var(--space-l); }
+  .f-hero :global(.f-arcs) { position: absolute; right: -3rem; top: -2rem; width: clamp(140px, 20vw, 300px); }
+  .f-hero .wrap { position: relative; display: grid; gap: var(--space-s); }
+  .f-hero h1 { font-size: clamp(2rem, 1.1rem + 3vw, 3.6rem); max-width: 20ch; margin-top: var(--space-xs); }
+  .finder { display: grid; gap: var(--space-s); margin-top: var(--space-s); max-width: 56rem; }
+  .f-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .f-input { flex: 1 1 18rem; display: flex; align-items: center; gap: 0.5rem; padding-inline: 1rem; border-radius: var(--radius-pill); background: oklch(0.995 0.003 85); box-shadow: 0 0 0 1.5px var(--line), var(--shadow-soft); }
+  .f-input:focus-within { box-shadow: 0 0 0 2px var(--teal-deep), 0 0 0 6px oklch(0.64 0.103 194.6 / 0.22); }
+  .f-input svg { width: 1.35rem; color: var(--orange-deep); flex: none; }
+  .f-input input { flex: 1; width: 0; min-width: 0; border: 0; background: none; padding: 0.95rem 0.25rem; font-size: 1.1rem; outline: none; }
+  .geo svg { width: 1.15rem; }
+  .f-tags { display: flex; flex-wrap: wrap; gap: 0.45rem; border: 0; padding: 0; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .chip span { display: inline-block; padding: 0.45rem 0.95rem; border-radius: var(--radius-pill); box-shadow: inset 0 0 0 1.5px var(--line); background: oklch(0.99 0.004 85); font-size: 0.9rem; font-weight: 600; transition: background-color 0.2s var(--ease-out), color 0.2s; }
+  .chip input:checked + span { background: var(--ink); color: var(--paper); box-shadow: none; }
+  .chip input:checked + span::before { content: '✓ '; color: var(--orange); }
+  .chip input:focus-visible + span { outline: 3px solid var(--orange); outline-offset: 2px; }
+  .chip:hover span { box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+
+  .results-wrap { padding-bottom: var(--space-xl); }
+  .results { display: grid; gap: var(--space-m); }
+  .view-toggle { display: flex; gap: 0.3rem; padding: 0.3rem; margin-bottom: var(--space-s); border-radius: var(--radius-pill); background: var(--paper-2); width: max-content; }
+  .view-toggle[hidden] { display: none; }
+  .view-toggle button { border: 0; background: none; padding: 0.55rem 1.4rem; border-radius: var(--radius-pill); font-weight: 650; color: var(--ink-2); }
+  .view-toggle button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+  .results[data-mode='list'] .map-col { display: none; }
+  .results[data-mode='map'] .list-col { display: none; }
+  .results[data-mode='map'] .map { height: 70vh; }
+  .map { height: 42vh; min-height: 300px; border-radius: var(--radius-lg); overflow: hidden; background: var(--paper-2); box-shadow: 0 0 0 1px var(--line); z-index: 0; }
+  @media (min-width: 64rem) {
+    .results { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: start; }
+    .map-col { order: 0; position: sticky; top: 5.75rem; height: calc(100vh - 7rem); }
+    .map { height: 100%; }
+  }
+  .nomap { padding: var(--space-m); }
+  .status { font-weight: 650; font-size: 0.975rem; margin-bottom: var(--space-s); color: var(--ink-2); }
+  .people { list-style: none; padding: 0; display: grid; gap: 0.75rem; }
+  .none { padding: var(--space-m); border-radius: var(--radius-m); background: var(--orange-tint); }
+  .linkbtn { border: 0; background: none; padding: 0; color: var(--teal-deep); text-decoration: underline; font-weight: 650; }
+  .city-links { list-style: none; padding: 0; margin-top: var(--space-m); display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.25rem 1.5rem; }
+  .city-links a { display: flex; justify-content: space-between; padding: 0.55rem 0; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 550; }
+  .city-links a span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .city-links a:hover { color: var(--teal-deep); }
+  .info { margin-top: var(--space-m); font-size: 0.95rem; }
+  :global(.leaflet-container) { font-family: var(--font); }
+  :global(.leaflet-tooltip) { font-weight: 650; border-radius: 8px; border: 0; box-shadow: var(--shadow-soft); }
+</style>

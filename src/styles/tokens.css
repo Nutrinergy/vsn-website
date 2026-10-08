@@ -1,0 +1,82 @@
+/* VSN design tokens — zie DESIGN.md */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('/fonts/archivo-latin.woff2') format('woff2-variations'), url('/fonts/archivo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('/fonts/archivo-latin-ext.woff2') format('woff2-variations'), url('/fonts/archivo-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Metrisch afgestemde fallback om layout shift tijdens het laden van het font te beperken */
+@font-face {
+  font-family: 'Archivo Fallback';
+  src: local('Arial');
+  size-adjust: 103%;
+  ascent-override: 88%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+:root {
+  color-scheme: light;
+
+  --paper: oklch(0.975 0.008 85);
+  --paper-2: oklch(0.945 0.014 80);
+  --line: oklch(0.88 0.012 85);
+  --ink: oklch(0.24 0.035 205);
+  --ink-2: oklch(0.4 0.03 205);
+  --muted: oklch(0.5 0.025 205);
+
+  --teal: oklch(0.64 0.103 194.6);
+  --teal-deep: oklch(0.48 0.085 196);
+  --teal-ink: oklch(0.32 0.06 200);
+  --teal-tint: oklch(0.93 0.035 190);
+
+  --orange: oklch(0.7 0.17 57);
+  --orange-deep: oklch(0.56 0.15 48);
+  /* Alleen voor grote display-tekst (≥ 24px): 3,6:1 op paper */
+  --orange-display: oklch(0.62 0.165 52);
+  --orange-tint: oklch(0.94 0.04 70);
+
+  --font: 'Archivo', 'Archivo Fallback', system-ui, sans-serif;
+
+  --step--1: 0.875rem;
+  --step-0: 1.125rem;
+  --step-1: clamp(1.2rem, 1.05rem + 0.6vw, 1.45rem);
+  --step-2: clamp(1.4rem, 1.15rem + 1vw, 1.8rem);
+  --step-3: clamp(1.9rem, 1.3rem + 2.4vw, 3.2rem);
+  --step-4: clamp(2.6rem, 1.4rem + 5.2vw, 6rem);
+
+  --space-2xs: 0.375rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: clamp(2rem, 1.5rem + 2vw, 3rem);
+  --space-xl: clamp(3rem, 2rem + 4vw, 5.5rem);
+  --space-2xl: clamp(4.5rem, 3rem + 7vw, 9rem);
+
+  --radius-s: 0.5rem;
+  --radius-m: 1rem;
+  --radius-lg: 1.75rem;
+  --radius-pill: 999px;
+
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2.5rem);
+  --max: 84rem;
+  --measure: 68ch;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-soft: 0 1px 2px oklch(0.24 0.035 205 / 0.06), 0 8px 24px -8px oklch(0.24 0.035 205 / 0.14);
+  --shadow-lift: 0 2px 4px oklch(0.24 0.035 205 / 0.06), 0 22px 44px -18px oklch(0.24 0.035 205 / 0.28);
+}

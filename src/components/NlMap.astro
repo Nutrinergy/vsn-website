@@ -1,0 +1,43 @@
+---
+import map from '../data/nl-map.json';
+import people from '../data/sportdietisten.json';
+interface Props { tone?: 'light' | 'dark'; class?: string; label?: string }
+const { tone = 'light', class: cls = '', label } = Astro.props;
+const proj = (lng: number, lat: number) => [
+  +((lng - map.W) * map.k * map.scale).toFixed(1),
+  +((map.N - lat) * map.scale).toFixed(1),
+];
+const points = people.flatMap((p, pi) => p.locations.map((l) => ({ xy: proj(l.lng, l.lat), city: l.city, i: pi })));
+const total = people.length;
+const cities = new Set(points.map((p) => p.city)).size;
+const alt = label ?? `Kaart van Nederland met ${points.length} praktijklocaties van ${total} VSN-sportdiëtisten in ${cities} plaatsen.`;
+---
+<figure class:list={['nlmap', tone, cls]}>
+  <svg viewBox={`0 0 ${map.width} ${map.height}`} role="img" aria-label={alt}>
+    <image href={tone === 'dark' ? '/kaart/nl-dots-dark.svg' : '/kaart/nl-dots.svg'} width={map.width} height={map.height} />
+    <g class="pins">
+      {points.map((p, i) => (
+        <g transform={`translate(${p.xy[0]} ${p.xy[1]})`} style={`--i:${i % 23}`}>
+          <circle class="halo" r="11" />
+          <circle class:list={['pin', { alt: p.i % 3 === 0 }]} r="5.6" />
+        </g>
+      ))}
+    </g>
+  </svg>
+</figure>
+<style>
+  .nlmap { margin: 0; position: relative; }
+  .nlmap svg { width: 100%; height: auto; overflow: visible; }
+  .pin { fill: var(--orange); stroke: var(--paper); stroke-width: 2; }
+  .pin.alt { fill: var(--teal-deep); }
+  .dark .pin { stroke: var(--ink); }
+  .dark .pin.alt { fill: var(--teal); }
+  .halo { fill: var(--orange); opacity: 0; transform-box: fill-box; transform-origin: center; }
+  @media (prefers-reduced-motion: no-preference) {
+    .halo { animation: ping 3.6s var(--ease-out) infinite; animation-delay: calc(var(--i) * 0.31s); }
+  }
+  @keyframes ping {
+    0% { opacity: 0.45; transform: scale(0.4); }
+    60%, 100% { opacity: 0; transform: scale(1.6); }
+  }
+</style>

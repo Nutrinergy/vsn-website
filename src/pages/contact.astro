@@ -1,0 +1,72 @@
+---
+import { FORM_ENDPOINT, THANKS_URL } from '../consts';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import FinderSearch from '../components/FinderSearch.astro';
+import { breadcrumbs, webPage } from '../lib/schema';
+import { SITE, SOCIAL } from '../consts';
+
+const title = 'Contact met de Vereniging Sportvoedingsexperts Nederland';
+const description = 'Neem contact op met de VSN. Voor stages, interviews, lezingen of advies verwijzen we je naar een sportdiëtist bij jou in de buurt.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Contact', href: '/contact/' }];
+const frequent = ['Stageplekken', 'Profielwerkstukken', 'Interviews', 'Lezingen', 'Bijdragen aan onderzoek', 'Een sportdiëtist met een specifieke specialisatie of in een bepaalde regio'];
+---
+<Base {title} {description} schema={[webPage({ path: '/contact/', title, description, type: 'ContactPage' }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} kicker="Contact" title="Hoe kunnen we helpen?" lead="Een vraag aan de vereniging, of wil je lid worden? Stuur ons een bericht. We reageren zo snel mogelijk, in elk geval binnen twee weken." />
+
+  <section class="section section--tight">
+    <div class="wrap layout">
+      <aside class="first" data-reveal>
+        <h2 class="h3">Eerst even dit</h2>
+        <p>We krijgen veel vragen over:</p>
+        <ul role="list" class="freq">{frequent.map((f) => <li>{f}</li>)}</ul>
+        <p>Als beroepsvereniging kunnen we die vragen niet individueel beantwoorden. Neem hiervoor direct contact op met een sportdiëtist bij jou in de buurt. Die helpt je graag verder.</p>
+        <FinderSearch id="contact-q" />
+      </aside>
+
+      <div class="form-col">
+        <form class="form card" name="contact" method="POST" action={FORM_ENDPOINT || '/bedankt/'} data-netlify={FORM_ENDPOINT ? undefined : 'true'} netlify-honeypot={FORM_ENDPOINT ? undefined : 'bot-field'}>
+          <input type="hidden" name="form-name" value="contact" />
+        {FORM_ENDPOINT && <><input type="hidden" name="_next" value={THANKS_URL} /><input type="hidden" name="redirect" value={THANKS_URL} /><input type="hidden" name="_subject" value="Nieuw bericht via sportdietetiek.nl (contact)" /></>}
+          <p class="hp"><label>Niet invullen <input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+          <div class="form-grid">
+            <div class="field"><label for="naam">Naam</label><input id="naam" name="naam" autocomplete="name" required /></div>
+            <div class="field"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required /></div>
+            <div class="field span-2">
+              <label for="onderwerp">Onderwerp</label>
+              <select id="onderwerp" name="onderwerp" required>
+                <option value="">Kies een onderwerp</option>
+                <option>Lidmaatschap</option>
+                <option>Samenwerking of partnerschap</option>
+                <option>Pers en media</option>
+                <option>Website of mijn profiel op de kaart</option>
+                <option>Iets anders</option>
+              </select>
+            </div>
+            <div class="field span-2"><label for="bericht">Bericht</label><textarea id="bericht" name="bericht" required></textarea></div>
+            <label class="choice span-2"><input type="checkbox" name="akkoord" required /> Ik ga akkoord met de verwerking van mijn gegevens volgens de <a href="/privacyverklaring/">privacyverklaring</a>.</label>
+          </div>
+          <button class="btn" type="submit">Verstuur bericht <span class="arrow" aria-hidden="true">→</span></button>
+        </form>
+        <dl class="direct">
+          <div><dt>E-mail</dt><dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd></div>
+          <div><dt>Volg ons</dt><dd><a href={SOCIAL.instagram} rel="noopener" target="_blank">Instagram</a> · <a href={SOCIAL.x} rel="noopener" target="_blank">X</a></dd></div>
+          <div><dt>Gegevens</dt><dd>{SITE.name}<br />{SITE.city} · KvK {SITE.kvk}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .layout { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 60rem) { .layout { grid-template-columns: 0.85fr 1.15fr; } }
+  .first { display: grid; gap: var(--space-s); padding: var(--space-l) var(--space-m); border-radius: var(--radius-lg); background: var(--orange-tint); }
+  .freq { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .freq li { padding: 0.3rem 0.8rem; border-radius: var(--radius-pill); background: oklch(0.99 0.004 85); font-size: 0.9rem; font-weight: 600; }
+  .form-col { display: grid; gap: var(--space-l); }
+  .card { padding: clamp(1.25rem, 1rem + 2vw, 2.5rem); border-radius: var(--radius-lg); background: oklch(0.995 0.003 85); box-shadow: var(--shadow-soft), 0 0 0 1px var(--line); }
+  .card .btn { justify-self: start; }
+  .direct { display: grid; gap: var(--space-s); grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+  .direct dt { font-size: 0.8rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal-deep); }
+  .direct dd { margin: 0.2rem 0 0; font-weight: 550; }
+</style>

@@ -1,0 +1,17 @@
+export type QA = { q: string; a: string; html?: string };
+
+export const FAQ_SPORTERS: QA[] = [
+  { q: 'Wat doet een sportdiëtist?', a: 'Een sportdiëtist is gespecialiseerd in persoonlijke voedingsadviezen voor sporters. De adviezen zijn afgestemd op je trainingen, wedstrijden en persoonlijke doelen.' },
+  { q: 'Waarin verschilt een sportdiëtist van een ‘gewone’ diëtist?', a: 'Een sportdiëtist heeft naast de reguliere HBO-opleiding tot diëtist een post-HBO opleiding Sportdiëtetiek gevolgd. Daardoor heeft een sportdiëtist specifieke kennis van inspanningsfysiologie, trainingsschema’s en sportspecifieke omstandigheden, en kan het voedingsadvies optimaal afstemmen op de doelen en wensen van de sporter.' },
+  { q: 'Wanneer is het verstandig om een sportdiëtist te raadplegen?', a: 'Als je regelmatig sport en een specifiek doel wilt bereiken. Denk aan het verlagen van je vetpercentage, het opbouwen van spiermassa, het voorbereiden op een wedstrijd of het verminderen van maag-darmklachten tijdens inspanning. Ook voor praktische vragen kun je terecht, zoals ‘moet ik koolhydraten stapelen voor een marathon?’ of ‘heb ik creatine nodig als ik veel krachttraining doe?’' },
+  { q: 'Geeft een sportdiëtist ook trainingsadviezen?', a: 'Nee. Een sportdiëtist geeft voedingsadviezen die zijn afgestemd op je sportactiviteiten en doelen. Een sportdiëtist heeft kennis van trainingsprogramma’s, trainingsopbouw en wedstrijdplanning, maar schrijft zelf geen trainingsschema’s.' },
+  { q: 'Moet ik meer eten als ik veel sport?', a: 'Als je veel en intensief sport, is je energiebehoefte waarschijnlijk hoger dan die van iemand die niet sport. Hoeveel en wat je precies moet eten, hangt van veel factoren af. Een sportdiëtist bij jou in de buurt helpt je je energiebehoefte te bepalen en je voeding af te stemmen op je sport.' },
+  { q: 'Welke supplementen zijn nuttig als ik veel sport?', a: 'Er zijn heel veel supplementen op de markt, maar slechts een handjevol werkt, en dan nog alleen bij specifieke doelen en sporten. Raadpleeg een sportdiëtist als je vragen hebt over supplementen, en kies alleen producten van de NZVT-lijst.' },
+];
+
+export const FAQ_VERENIGING: QA[] = [
+  { q: 'Wat is de VSN?', a: 'De Vereniging Sportvoedingsexperts Nederland is dé beroepsvereniging voor sportdiëtisten en andere sportvoedingsexperts. Leden hebben de post-HBO opleiding Sportdiëtetiek gevolgd, of hebben een universitaire achtergrond in voeding aangevuld met een IOC-diploma of master in Sports Nutrition.' },
+  { q: 'Wat doet de VSN?', a: 'De VSN organiseert scholing voor sportdiëtisten en sportvoedingsexperts en bewaakt zo de kwaliteit van het vak. Daarnaast geeft de VSN voorlichting aan sporters en sportprofessionals en schrijven leden artikelen en blogs voor bladen en sites voor sporters en sportprofessionals.' },
+  { q: 'Wie kan lid worden van de VSN?', a: 'Diëtisten die de post-HBO opleiding Sportdiëtetiek met goed gevolg hebben afgerond. Ook sportvoedingsexperts met een universitaire achtergrond in voeding, aangevuld met een IOC-diploma of een master in Sports Nutrition of vergelijkbare opleiding, kunnen onder voorwaarden lid worden.' },
+  { q: 'Wat is het SCAS-register?', a: 'SCAS (Stichting Certificering Actoren in de Sportgezondheidszorg) borgt de kwaliteit van sportdiëtisten. Gecertificeerde sportdiëtisten voldoen aan eisen voor werkervaring en deskundigheidsbevordering, zoals bijscholing en intervisie. De VSN raadt elk lid dat sportdiëtist is aan om SCAS-geregistreerd te zijn.' },
+];

@@ -1,0 +1,23 @@
+---
+import type { Crumb } from '../lib/schema';
+interface Props { items: Crumb[]; tone?: 'default' | 'light' }
+const { items, tone = 'default' } = Astro.props;
+---
+<nav class:list={['crumbs', tone]} aria-label="Kruimelpad">
+  <ol role="list">
+    {items.map((c, i) => (
+      <li>
+        {i < items.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>
+<style>
+  .crumbs ol { display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; list-style: none; padding: 0; font-size: 0.875rem; font-weight: 550; color: var(--muted); }
+  .crumbs li + li::before { content: '/'; margin-right: 0.5rem; color: var(--line); color: oklch(0.7 0.02 200); }
+  .crumbs a { color: var(--ink-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--ink); text-decoration: underline; text-decoration-color: var(--orange); }
+  .crumbs span { color: var(--muted); }
+  .crumbs.light ol, .crumbs.light span { color: oklch(0.82 0.02 200); }
+  .crumbs.light a { color: var(--paper); }
+</style>

@@ -1,0 +1,105 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ArticleCard from '../../../components/ArticleCard.astro';
+import TwoDoors from '../../../components/TwoDoors.astro';
+import { KENNISBANK_CATEGORIES } from '../../../consts';
+import { article, breadcrumbs } from '../../../lib/schema';
+import { formatDate, readingTime } from '../../../lib/format';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('kennisbank');
+  return posts.map((post) => ({ params: { category: post.data.category, slug: post.id }, props: { post, all: posts } }));
+}
+const { post, all } = Astro.props;
+const { Content, headings } = await render(post);
+const d = post.data;
+const cat = KENNISBANK_CATEGORIES[d.category];
+const path = `/kennisbank/${d.category}/${post.id}/`;
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Kennisbank', href: '/kennisbank/' },
+  { name: cat.label, href: `/kennisbank/${d.category}/` },
+  { name: d.title, href: path },
+];
+const minutes = readingTime(post.body ?? '');
+const toc = headings.filter((h) => h.depth === 2);
+const related = all.filter((p) => p.id !== post.id).sort((a, b) => (b.data.category === d.category ? 1 : 0) - (a.data.category === d.category ? 1 : 0)).slice(0, 3);
+const ogImage = `/og/kennisbank-${post.id}.jpg`;
+---
+<Base
+  title={`${d.title} | Kennisbank VSN`.length <= 66 ? `${d.title} | Kennisbank VSN` : `${d.title} | VSN`}
+  description={d.description}
+  type="article"
+  image={ogImage}
+  imageAlt={d.imageAlt}
+  published={d.published}
+  updated={d.updated}
+  schema={[article({ path, title: d.title, description: d.description, author: d.author, published: d.published, updated: d.updated, image: ogImage, section: cat.label }), breadcrumbs(crumbs)]}
+>
+  <article>
+    <header class="wrap a-head">
+      <Breadcrumbs items={crumbs} />
+      <p class="meta-top"><a class="tag" href={`/kennisbank/${d.category}/`}>{cat.label}</a><span class="muted">{minutes} min lezen</span></p>
+      <h1>{d.title}</h1>
+      <p class="lead">{d.description}</p>
+      <div class="byline">
+        <span class="avatar" aria-hidden="true">{d.author.split(' ').map((w) => w[0]).filter((c) => c === c.toUpperCase()).slice(0, 2).join('')}</span>
+        <span>
+          <strong>{d.author}</strong><span class="muted">Sportdiëtist, lid VSN</span>
+        </span>
+        <span class="dates muted">
+          Gepubliceerd <time datetime={d.published.toISOString().slice(0, 10)}>{formatDate(d.published)}</time>
+          {d.updated && +d.updated !== +d.published && <><br />Bijgewerkt <time datetime={d.updated.toISOString().slice(0, 10)}>{formatDate(d.updated)}</time></>}
+        </span>
+      </div>
+    </header>
+    <div class="wrap a-img">
+      <Image src={d.image} alt={d.imageAlt} widths={[640, 960, 1280, 1600]} sizes="(min-width: 84rem) 84rem, 96vw" loading="eager" fetchpriority="high" class="img-cover" />
+    </div>
+    <div class="wrap a-body">
+      {toc.length > 2 && (
+        <nav class="toc" aria-label="Inhoud van dit artikel">
+          <p class="label">In dit artikel</p>
+          <ol role="list">{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+        </nav>
+      )}
+      <div class="prose">
+        <Content />
+        <aside class="note">
+          <p><strong>Advies op maat?</strong> Dit artikel geeft algemene informatie. Een <a href="/zoek-een-sport-dietist-in-de-buurt/">sportdiëtist bij jou in de buurt</a> vertaalt het naar jouw sport, lichaam en doelen.</p>
+        </aside>
+      </div>
+    </div>
+  </article>
+
+  <section class="section section--paper2 section--tight" aria-labelledby="more">
+    <div class="wrap">
+      <div class="section-head"><p class="label">Kennisbank</p><h2 id="more">Lees ook</h2></div>
+      <div class="cards">{related.map((p) => <ArticleCard post={p} />)}</div>
+    </div>
+  </section>
+  <TwoDoors />
+</Base>
+<style>
+  .a-head { display: grid; gap: var(--space-s); padding-block: var(--space-l) var(--space-l); max-width: 60rem; margin-left: max(var(--gutter), calc((100% - var(--max)) / 2)); }
+  .a-head h1 { font-size: clamp(2.2rem, 1.2rem + 3.6vw, 4.2rem); margin-top: 0.2rem; }
+  .meta-top { display: flex; gap: 0.9rem; align-items: center; font-size: 0.9rem; }
+  .meta-top .tag { text-decoration: none; }
+  .byline { display: flex; flex-wrap: wrap; gap: 0.9rem 1.5rem; align-items: center; margin-top: var(--space-xs); font-size: 0.95rem; }
+  .byline > span:nth-child(2) { display: grid; line-height: 1.35; }
+  .avatar { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; background: var(--teal-ink); color: var(--paper); font-weight: 800; font-stretch: 120%; }
+  .dates { font-size: 0.875rem; line-height: 1.45; padding-left: 1.5rem; border-left: 1.5px solid var(--line); }
+  .a-img { aspect-ratio: 21 / 9; border-radius: var(--radius-lg); overflow: hidden; max-height: 34rem; }
+  .a-body { display: grid; gap: var(--space-l); padding-block: var(--space-xl); }
+  @media (min-width: 64rem) { .a-body { grid-template-columns: 15rem minmax(0, 1fr); gap: var(--space-xl); } .toc { position: sticky; top: 6.5rem; align-self: start; } }
+  .toc ol { list-style: none; padding: 0; margin-top: 0.75rem; display: grid; gap: 0.15rem; counter-reset: t; border-left: 1.5px solid var(--line); }
+  .toc li { counter-increment: t; }
+  .toc a { display: block; padding: 0.35rem 0 0.35rem 1rem; margin-left: -1.5px; border-left: 1.5px solid transparent; color: var(--ink-2); text-decoration: none; font-size: 0.925rem; line-height: 1.35; }
+  .toc a:hover { color: var(--ink); border-left-color: var(--orange); }
+  .note { margin-top: var(--space-l) !important; padding: var(--space-m); border-radius: var(--radius-m); background: var(--teal-tint); font-size: 1rem; }
+  .cards { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+  @media (max-width: 40rem) { .a-img { aspect-ratio: 4 / 3; } .dates { padding-left: 0; border-left: 0; } }
+</style>

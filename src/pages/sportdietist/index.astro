@@ -1,0 +1,99 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import FinderSearch from '../../components/FinderSearch.astro';
+import TwoDoors from '../../components/TwoDoors.astro';
+import { breadcrumbs, webPage, faq } from '../../lib/schema';
+import { FAQ_SPORTERS } from '../../data/faq';
+import { cityPages, citySlug } from '../../lib/cities';
+import { PARTNERS } from '../../consts';
+import hero from '../../assets/foto/rugby.jpg';
+import piramide from '../../assets/foto/sportvoedingspiramide.jpg';
+
+const title = 'Wat doet een sportdiëtist? Voedingsadvies voor sporters';
+const description = 'Een sportdiëtist maakt een voedingsplan dat past bij jouw sport, trainingsschema, doelen en smaak. Lees wat een sportdiëtist doet en hoe je een goede vindt.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Wat doet een sportdiëtist?', href: '/sportdietist/' }];
+const top = cityPages().sort((a, b) => b.inCity - a.inCity).slice(0, 12).sort((a, b) => a.city.localeCompare(b.city, 'nl'));
+const steps = [
+  { t: 'Intake', d: 'Je sportdiëtist brengt je sport, trainingsschema, doelen, eetpatroon en medische achtergrond in kaart.' },
+  { t: 'Metingen', d: 'Waar nodig: gewicht, lichaamssamenstelling of huidplooien volgens de ISAK-methode.' },
+  { t: 'Plan op maat', d: 'Een voedingsadvies dat past bij jouw sport, je doelen en, niet onbelangrijk, je smaak.' },
+  { t: 'Bijsturen', d: 'In vervolgafspraken evalueer je samen en wordt het plan aangepast aan seizoen en schema.' },
+];
+---
+<Base {title} {description} schema={[webPage({ path: '/sportdietist/', title, description }), breadcrumbs(crumbs), faq(FAQ_SPORTERS.slice(0, 4))]}>
+  <PageHero {crumbs} kicker="Voor sporters" title="Wat doet een sportdiëtist?" lead="Goed eten en drinken heeft veel invloed op je gezondheid én je prestaties. Een sportdiëtist kent de inspanningsfysiologie, weet tegen welke voedingsproblemen sporters aanlopen en maakt een plan dat bij jóu past." image={hero} imageAlt="Rugbyspelers in actie tijdens een wedstrijd">
+    <FinderSearch id="sd-q" />
+  </PageHero>
+
+  <section class="section section--tight">
+    <div class="wrap two">
+      <div class="prose" data-reveal>
+        <h2>Waarom een sportdiëtist?</h2>
+        <p>Op internet, in tijdschriften en in boeken vind je eindeloos veel informatie over voeding en sport. Een sportdiëtist maakt daar samen met jou een persoonlijk plan van, aangepast aan je leefstijl, (prestatie)doelen en voorkeuren. Er wordt gekeken naar je trainingsschema en wedstrijdplanning, de duur en intensiteit van je inspanningen en de tijden waarop je traint. Iedere sport stelt immers andere eisen.</p>
+        <p>Ook voor vragen over lichaamssamenstelling kun je bij een sportdiëtist terecht. Gezondheid en prestatie zijn niet los van elkaar te zien: een sportdiëtist heeft brede kennis van beide, en dat is het startpunt van de begeleiding.</p>
+      </div>
+      <ol class="steps" role="list">
+        {steps.map((s, i) => (
+          <li data-reveal style={`--d:${i}`}><span class="sn">{i + 1}</span><div><h3>{s.t}</h3><p>{s.d}</p></div></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--teal quality" aria-labelledby="q-title">
+    <div class="wrap q-grid">
+      <div data-reveal>
+        <p class="label q-label">Kwaliteit</p>
+        <h2 id="q-title">Sportdiëtist-VSN<sup>®</sup> en SCAS</h2>
+        <p class="q-lead">Een sportdiëtist die lid is van de VSN mag zich <strong>sportdiëtist-VSN<sup>®</sup></strong> noemen. Om sporters een goed en wetenschappelijk onderbouwd advies te garanderen, hanteert de VSN een kwaliteitssysteem, opgezet met de Stichting Certificering Actoren in de Sportgezondheidszorg (SCAS).</p>
+        <p>Voor SCAS-certificering moeten sportdiëtisten voldoen aan eisen voor werkervaring en deskundigheidsbevordering, zoals bijscholing en intervisie. Gecertificeerde sportdiëtisten mogen het SCAS-logo voeren.</p>
+        <p><a class="btn btn--ghost" href={PARTNERS.scas} rel="noopener" target="_blank">Naar het SCAS-register <span class="arrow" aria-hidden="true">↗</span></a></p>
+      </div>
+      <figure class="q-fig" data-reveal style="--d:1">
+        <Image src={piramide} alt="De VSN sportvoedingspiramide met basisvoeding, sportspecifieke voeding en sportsupplementen" widths={[400, 640, 900]} sizes="(min-width: 60rem) 36vw, 90vw" class="rounded" />
+        <figcaption>Sportdiëtisten van de VSN werken met de <a href="/sportvoedingspiramide/">sportvoedingspiramide</a>.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="faq-t">
+    <div class="wrap--narrow">
+      <h2 id="faq-t">Veelgestelde vragen</h2>
+      <div class="faq">{FAQ_SPORTERS.map((x) => <details><summary>{x.q}</summary><p>{x.a}</p></details>)}</div>
+    </div>
+  </section>
+
+  <section class="section section--paper2 section--tight" aria-labelledby="cities">
+    <div class="wrap">
+      <h2 id="cities" class="h3">Sportdiëtist in jouw plaats</h2>
+      <ul class="cities" role="list">{top.map((c) => <li><a href={`/sportdietist/${citySlug(c.city)}/`}>{c.city}</a></li>)}</ul>
+      <p><a class="link-arrow" href="/zoek-een-sport-dietist-in-de-buurt/">Alle plaatsen en de kaart <span class="arrow" aria-hidden="true">→</span></a></p>
+    </div>
+  </section>
+  <TwoDoors />
+</Base>
+<style>
+  .two { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 60rem) { .two { grid-template-columns: 1.1fr 0.9fr; } }
+  .two .prose h2 { margin-top: 0; }
+  .steps { list-style: none; padding: 0; display: grid; gap: 0; counter-reset: s; }
+  .steps li { display: grid; grid-template-columns: auto 1fr; gap: 1rem; padding-block: var(--space-m); border-top: 1.5px solid var(--line); }
+  .sn { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--orange); color: var(--ink); font-weight: 850; font-stretch: 120%; }
+  .steps h3 { font-size: 1.25rem; }
+  .steps p { color: var(--ink-2); font-size: 1rem; margin-top: 0.2rem; }
+  .quality { color: oklch(0.88 0.02 195); }
+  .q-grid { display: grid; gap: var(--space-xl); align-items: center; }
+  @media (min-width: 60rem) { .q-grid { grid-template-columns: 1.1fr 0.9fr; } }
+  .q-grid > div { display: grid; gap: var(--space-s); }
+  .q-label { color: var(--orange); }
+  .q-lead { font-size: var(--step-1); line-height: 1.5; color: var(--paper); }
+  .quality a:not(.btn) { color: var(--teal-tint); }
+  .q-fig { margin: 0; display: grid; gap: 0.75rem; background: var(--paper); padding: var(--space-s); border-radius: var(--radius-lg); }
+  .q-fig figcaption { color: var(--ink-2); font-size: 0.925rem; padding-inline: 0.5rem; }
+  .q-fig figcaption a { color: var(--teal-deep); }
+  .cities { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; margin-block: var(--space-m); }
+  .cities a { display: inline-block; padding: 0.5rem 1rem; border-radius: var(--radius-pill); background: oklch(0.99 0.004 85); box-shadow: inset 0 0 0 1.5px var(--line); color: var(--ink); text-decoration: none; font-weight: 600; }
+  .cities a:hover { background: var(--ink); color: var(--paper); }
+</style>

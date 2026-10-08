@@ -1,0 +1,113 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Arcs from '../../components/Arcs.astro';
+import EventRow from '../../components/EventRow.astro';
+import { breadcrumbs, event as eventSchema, webPage } from '../../lib/schema';
+import { dayNum, monthShort, year, formatRange, formatDate, isUpcoming, eventSortKey } from '../../lib/format';
+import { MEMBER_LOGIN } from '../../consts';
+
+export async function getStaticPaths() {
+  const all = await getCollection('agenda');
+  return all.map((e) => ({ params: { path: e.data.path }, props: { entry: e, all } }));
+}
+const { entry, all } = Astro.props;
+const { Content } = await render(entry);
+const e = entry.data;
+const path = `/agenda/${e.path}/`;
+const upcoming = isUpcoming(e.start, e.end);
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Agenda', href: '/agenda/' }, { name: e.title, href: path }];
+const others = all.filter((x) => x.id !== entry.id && isUpcoming(x.data.start, x.data.end)).sort((a, b) => eventSortKey(a.data.start) - eventSortKey(b.data.start)).slice(0, 3);
+const when = formatDate(e.start);
+const pageTitle = `${e.title}, ${when}`.length <= 64 ? `${e.title}, ${when}` : e.title.length <= 56 && !e.title.includes(year(e.start)) ? `${e.title} (${year(e.start)})` : e.title;
+const lead = `${formatRange(e.start, e.end)}${e.mode === 'online' ? ', online' : e.location ? `, ${e.location}` : ''}. `;
+const descFull = (lead.charAt(0).toUpperCase() + lead.slice(1) + e.summary).replace(/\s+/g, ' ');
+const description = descFull.length > 158 ? descFull.slice(0, 155).replace(/\s\S*$/, '') + '…' : descFull;
+const schema = [breadcrumbs(crumbs), upcoming ? eventSchema({ path, title: e.title, description: e.summary, start: e.start, end: e.end, mode: e.mode, location: e.location, organizer: e.organizer, link: e.link }) : webPage({ path, title: e.title, description })];
+---
+<Base title={`${pageTitle} | VSN`} {description} {schema}>
+  <section class="ev-hero">
+    <Arcs class="ev-arcs" tone="light" width={28} />
+    <div class="wrap grid">
+      <div class="txt">
+        <Breadcrumbs items={crumbs} tone="light" />
+        <p class="tags">
+          {e.organizer === 'vsn' ? <span class="tag tag--orange">VSN</span> : <span class="tag">Ook interessant</span>}
+          <span class="tag">{e.mode === 'online' ? 'Online' : 'Op locatie'}</span>
+          {e.membersOnly && <span class="tag">Alleen leden</span>}
+          {!upcoming && <span class="tag tag--line light">Afgelopen</span>}
+        </p>
+        <h1>{e.title}</h1>
+        <p class="lead">{e.summary}</p>
+      </div>
+      <div class="big-date" aria-hidden="true">
+        <span class="d">{dayNum(e.start)}</span>
+        <span class="m">{monthShort(e.start)} {year(e.start)}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="wrap layout">
+      <dl class="facts">
+        <div><dt>Datum</dt><dd><time datetime={e.start.toISOString().slice(0, 10)}>{formatRange(e.start, e.end)}</time></dd></div>
+        {e.time && <div><dt>Tijd</dt><dd>{e.time}</dd></div>}
+        <div><dt>Locatie</dt><dd>{e.mode === 'online' ? 'Online' : e.location || 'Wordt nog bekendgemaakt'}</dd></div>
+        <div><dt>Organisatie</dt><dd>{e.organizer === 'vsn' ? 'Vereniging Sportvoedingsexperts Nederland' : 'Externe organisatie'}</dd></div>
+        <div><dt>Voor wie</dt><dd>{e.membersOnly ? 'VSN-leden' : 'Sportdiëtisten, sportvoedingsexperts en andere professionals'}</dd></div>
+        {upcoming && (
+          <div class="cta">
+            {e.link ? (
+              <a class="btn" href={e.link} rel="noopener" target="_blank">Meer info en aanmelden <span class="arrow" aria-hidden="true">↗</span></a>
+            ) : e.membersOnly ? (
+              <a class="btn" href={MEMBER_LOGIN} rel="nofollow">Aanmelden via ledenportaal <span class="arrow" aria-hidden="true">→</span></a>
+            ) : null}
+            {e.membersOnly && <p class="small">Nog geen lid? <a href="/lid-worden/">Bekijk het lidmaatschap</a>.</p>}
+          </div>
+        )}
+      </dl>
+      <div class="prose">
+        {!upcoming && <p class="past-note">Dit evenement heeft plaatsgevonden. Bekijk de <a href="/agenda/">actuele agenda</a>.</p>}
+        <Content />
+      </div>
+    </div>
+  </section>
+
+  {others.length > 0 && (
+    <section class="section section--paper2 section--tight" aria-labelledby="more">
+      <div class="wrap">
+        <h2 id="more" class="h3">Ook in de agenda</h2>
+        <div class="list">{others.map((o) => <EventRow event={o} />)}</div>
+      </div>
+    </section>
+  )}
+</Base>
+<style>
+  .ev-hero { position: relative; overflow: hidden; background: var(--ink); color: oklch(0.86 0.02 200); padding-block: var(--space-l) var(--space-xl); }
+  .ev-hero :global(.ev-arcs) { position: absolute; right: -5rem; bottom: -6rem; width: clamp(200px, 26vw, 380px); }
+  .grid { position: relative; display: grid; gap: var(--space-l); align-items: end; }
+  @media (min-width: 56rem) { .grid { grid-template-columns: 1fr auto; } }
+  .txt { display: grid; gap: var(--space-s); max-width: 52rem; }
+  .ev-hero h1 { color: var(--paper); font-size: clamp(2.1rem, 1.2rem + 3.4vw, 4.2rem); }
+  .ev-hero .lead { color: oklch(0.86 0.02 200); max-width: 50ch; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tags .tag:not(.tag--orange) { background: oklch(0.975 0.008 85 / 0.12); color: var(--paper); }
+  .big-date { display: grid; justify-items: center; padding: 1.4rem 1.8rem; border-radius: var(--radius-lg); background: var(--orange); color: var(--ink); line-height: 1; justify-self: start; }
+  .big-date .d { font-size: clamp(3.5rem, 2rem + 4vw, 6rem); font-weight: 900; font-stretch: 125%; letter-spacing: -0.03em; }
+  .big-date .m { font-weight: 750; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.4rem; }
+  .layout { display: grid; gap: var(--space-xl); }
+  @media (min-width: 60rem) { .layout { grid-template-columns: 22rem minmax(0, 1fr); } .facts { position: sticky; top: 6.5rem; align-self: start; } }
+  .facts { display: grid; gap: 0; padding: var(--space-m); border-radius: var(--radius-lg); background: oklch(0.99 0.004 85); box-shadow: 0 0 0 1px var(--line); }
+  .facts > div { padding-block: 0.8rem; border-top: 1px solid var(--line); }
+  .facts > div:first-child { border-top: 0; padding-top: 0; }
+  .facts dt { font-size: 0.8rem; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal-deep); }
+  .facts dd { margin: 0.15rem 0 0; font-weight: 600; }
+  .facts dd time { display: inline-block; }
+  .facts dd time::first-letter { text-transform: uppercase; }
+  .cta { display: grid; gap: 0.6rem; }
+  .cta .btn { justify-self: start; }
+  .small { font-size: 0.9rem; color: var(--muted); }
+  .past-note { padding: var(--space-s) var(--space-m); border-radius: var(--radius-m); background: var(--orange-tint); font-weight: 550; }
+  .list { margin-top: var(--space-s); border-bottom: 1.5px solid var(--line); }
+</style>

@@ -1,0 +1,103 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import TwoDoors from '../../components/TwoDoors.astro';
+import FinderSearch from '../../components/FinderSearch.astro';
+import { breadcrumbs, webPage } from '../../lib/schema';
+
+export async function getStaticPaths() {
+  const topics = (await getCollection('onderwerpen')).sort((a, b) => a.data.order - b.data.order);
+  return topics.map((t, i) => ({
+    params: { slug: t.id },
+    props: { topic: t, prev: topics[i - 1] ?? null, next: topics[i + 1] ?? topics[0] },
+  }));
+}
+const { topic, next } = Astro.props;
+const { Content } = await render(topic);
+const d = topic.data;
+const path = `/voeding-en-sport/${topic.id}/`;
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: 'Voeding en sport', href: '/voeding-en-sport/' },
+  { name: d.title, href: path },
+];
+const all = await getCollection('kennisbank');
+const related = d.related.map((id) => all.find((p) => p.id === id)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+const layerName = { basis: 'Basisvoeding', sportspecifiek: 'Sportspecifieke voeding', supplementen: 'Supplementen', alle: 'Alle lagen' };
+---
+<Base title={d.seoTitle} description={d.description} image={`/og/onderwerp-${topic.id}.jpg`} imageAlt={d.imageAlt} schema={[webPage({ path, title: d.seoTitle, description: d.description }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} kicker={d.kicker} title={d.title} lead={d.intro} image={d.image} imageAlt={d.imageAlt} />
+
+  <section class="section section--tight">
+    <div class="wrap layout">
+      <article class="prose" data-reveal>
+        <Content />
+      </article>
+      <aside class="aside">
+        {d.pullquote && (
+          <blockquote class="pq" data-reveal><p>{d.pullquote}</p></blockquote>
+        )}
+        {d.layer && (
+          <a class="layer-card" href="/sportvoedingspiramide/" data-reveal>
+            <svg viewBox="0 0 120 90" aria-hidden="true">
+              <path d="M60 4 76 30H44Z" class:list={['l', { on: d.layer === 'supplementen' }]} data-l="s" />
+              <path d="M42 34h36l12 22H30Z" class:list={['l', { on: d.layer === 'sportspecifiek' }]} data-l="m" />
+              <path d="M28 60h64l14 26H14Z" class:list={['l', { on: d.layer === 'basis' }]} data-l="b" />
+            </svg>
+            <span><span class="label">In de sportvoedingspiramide</span><strong>{layerName[d.layer]}</strong><span class="link-arrow">Bekijk de piramide <span class="arrow" aria-hidden="true">→</span></span></span>
+          </a>
+        )}
+        <div class="find" data-reveal>
+          <h2 class="h3">Advies op maat?</h2>
+          <p>Een sportdiëtist vertaalt dit naar jouw sport, schema en doelen.</p>
+          <FinderSearch id="aside-q" />
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section section--paper2 section--tight" aria-labelledby="rel-title">
+      <div class="wrap">
+        <div class="section-head"><p class="label">Kennisbank</p><h2 id="rel-title">Verder lezen over {d.title.toLowerCase()}</h2></div>
+        <div class="cards">{related.map((p) => <ArticleCard post={p} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <nav class="wrap next" aria-label="Volgend onderwerp">
+    <a href={`/voeding-en-sport/${next.id}/`}>
+      <span class="label">Volgend onderwerp</span>
+      <span class="n-title">{next.data.title} <span class="arrow" aria-hidden="true">→</span></span>
+    </a>
+  </nav>
+
+  <TwoDoors />
+</Base>
+<style>
+  .layout { display: grid; gap: var(--space-xl); }
+  @media (min-width: 64rem) { .layout { grid-template-columns: minmax(0, 1fr) 22rem; } .aside { position: sticky; top: 6.5rem; align-self: start; } }
+  .aside { display: grid; gap: var(--space-m); }
+  .pq { margin: 0; padding: var(--space-m); border-radius: var(--radius-lg); background: var(--orange-tint); }
+  .pq p { font-size: 1.3rem; line-height: 1.3; font-weight: 700; font-stretch: 110%; color: var(--ink); }
+  .pq p::before { content: '“'; display: block; font-size: 3rem; line-height: 0.5; font-weight: 900; color: var(--orange-deep); margin-bottom: 0.5rem; }
+  .layer-card { display: grid; grid-template-columns: 6.5rem 1fr; gap: 1rem; align-items: center; padding: var(--space-m); border-radius: var(--radius-lg); background: oklch(0.99 0.004 85); box-shadow: 0 0 0 1px var(--line); color: var(--ink); text-decoration: none; transition: box-shadow 0.25s var(--ease-out); }
+  .layer-card:hover { box-shadow: var(--shadow-lift), 0 0 0 1px var(--line); }
+  .layer-card > span { display: grid; gap: 0.3rem; }
+  .layer-card strong { font-size: 1.15rem; font-stretch: 108%; }
+  .layer-card .link-arrow { font-size: 0.9rem; }
+  .l { fill: var(--paper-2); }
+  .l.on[data-l='b'] { fill: var(--teal-ink); }
+  .l.on[data-l='m'] { fill: var(--teal); }
+  .l.on[data-l='s'] { fill: var(--orange); }
+  .find { display: grid; gap: 0.75rem; padding: var(--space-m); border-radius: var(--radius-lg); background: var(--ink); color: oklch(0.86 0.02 200); }
+  .find h2 { color: var(--paper); font-size: 1.4rem; }
+  .cards { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+  .next { padding-block: var(--space-xl) 0; }
+  .next a { display: grid; gap: 0.4rem; padding-block: var(--space-l); border-top: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); text-decoration: none; color: var(--ink); }
+  .n-title { font-size: var(--step-3); font-weight: 850; font-stretch: 122%; letter-spacing: -0.02em; line-height: 1; }
+  .n-title .arrow { display: inline-block; color: var(--orange-deep); transition: transform 0.3s var(--ease-out); }
+  .next a:hover .arrow { transform: translateX(10px); }
+</style>

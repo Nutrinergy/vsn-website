@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { breadcrumbs, webPage } from '../lib/schema';
+import { SITE, MEMBER_PORTAL } from '../consts';
+const title = 'Privacyverklaring Vereniging Sportvoedingsexperts Nederland';
+const description = 'Hoe de Vereniging Sportvoedingsexperts Nederland (VSN) omgaat met persoonsgegevens van leden en bezoekers, conform de AVG.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Privacyverklaring', href: '/privacyverklaring/' }];
+---
+<Base {title} {description} schema={[webPage({ path: '/privacyverklaring/', title, description }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} title="Privacyverklaring" lead="Sinds 25 mei 2018 geldt de Algemene verordening gegevensbescherming (AVG). Je hebt het recht om te weten welke gegevens wij van je hebben, wat we ermee doen en hoe we ze beveiligen. Ook kun je vragen om je gegevens te wijzigen of te verwijderen." />
+  <section class="section section--tight">
+    <div class="wrap--narrow prose">
+      <p>Heb je vragen? Mail naar <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. We beantwoorden je vraag binnen twee weken.</p>
+      <h2>Over de VSN</h2>
+      <p>De Vereniging Sportvoedingsexperts Nederland (voorheen Vereniging Sportdiëtetiek Nederland) is gevestigd in {SITE.city} (Zeeland) en ingeschreven bij de Kamer van Koophandel onder nummer {SITE.kvk}. Onze diensten vallen onder de branche Preventieve gezondheidszorg (zonder arbobegeleiding), hoofdcategorie Gezondheids- en welzijnszorg, subcategorie Paramedische praktijken en overige gezondheidszorg zonder overnachting.</p>
+      <h2>Persoonsgegevens waarover wij beschikken</h2>
+      <p>Als je lid bent van de VSN, beschikken wij over de volgende gegevens:</p>
+      <ul><li>Je voor- en achternaam</li><li>De vestigingslocatie en het adres van je praktijk</li><li>Je e-mailadres</li><li>Je telefoonnummer</li><li>Je VSN-lidnummer</li><li>Je bankrekeningnummer (voor betalingen)</li></ul>
+      <p>Als je een formulier op deze website invult (contact of aanmelding), ontvangen we de gegevens die je daarin opgeeft.</p>
+      <h2>Waarvoor wij deze gegevens gebruiken</h2>
+      <p>Voor het bijhouden van onze ledenadministratie, het beantwoorden van je vraag en het tonen van je praktijkgegevens op de kaart van sportdiëtisten op deze website.</p>
+      <h2>Hoe lang wij gegevens bewaren</h2>
+      <p>We bewaren je gegevens zolang je lid bent. Na het beëindigen van je lidmaatschap zijn we wettelijk verplicht je gegevens nog vijf jaar te bewaren (fiscale bewaarplicht). Berichten via het contactformulier bewaren we niet langer dan nodig is om je vraag af te handelen.</p>
+      <h2>Bescherming van je gegevens</h2>
+      <p>Persoonsgegevens zijn digitaal opgeslagen en beveiligd met gebruikersnaam en wachtwoord. Bij een datalek melden we dit, zoals wettelijk verplicht, bij de Autoriteit Persoonsgegevens.</p>
+      <h2>Gegevens delen met derden</h2>
+      <p>We delen je gegevens niet actief met derden. Wel zijn de naam, het praktijkadres en de expertise van leden zichtbaar op de kaart van sportdiëtisten op deze website; contactgegevens staan op je profiel in het ledenportaal. Heb je daar bezwaar tegen, dan kun je je gegevens zelf aanpassen of verwijderen via je profiel in het <a href={MEMBER_PORTAL} rel="nofollow">ledenportaal</a>.</p>
+      <p>Onze ledenadministratie is, met instemming van onze leden, uitbesteed aan Sportzorg. Binnen die organisatie heeft één persoon toegang tot onze gegevens. Voor de incasso van contributie werken we met Medicas.</p>
+      <h2>Cookies en externe diensten</h2>
+      <p>Deze website plaatst <strong>geen tracking- of advertentiecookies</strong>. We gebruiken lettertypen die op onze eigen server staan, zodat je IP-adres niet naar derden gaat. De kaart op de zoekpagina wordt geladen via PDOK (een dienst van het Kadaster); bij het zoeken op plaats of postcode wordt je zoekterm naar de PDOK Locatieserver gestuurd om de locatie te bepalen. Kies je voor ‘Mijn locatie’, dan wordt je locatie alleen in je browser gebruikt en niet opgeslagen. Het ledenportaal gebruikt functionele cookies om je ingelogd te houden.</p>
+      <h2>Gebruik van de website</h2>
+      <p>Toegang tot en gebruik van deze website is persoonlijk. Gebruik de gegevens en informatie op deze website niet voor commerciële, politieke of publicitaire doeleinden, en in het bijzonder niet voor ongevraagde elektronische aanbiedingen.</p>
+      <h2>Je rechten</h2>
+      <p>Je hebt het recht om je persoonsgegevens in te zien, te laten corrigeren of te laten verwijderen. Stuur je verzoek naar <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. We reageren zo snel mogelijk, in elk geval binnen twee weken. Ben je niet tevreden over hoe we met je gegevens omgaan, dan kun je een klacht indienen bij de <a href="https://autoriteitpersoonsgegevens.nl/" rel="noopener" target="_blank">Autoriteit Persoonsgegevens</a>.</p>
+      <p class="muted">Laatst bijgewerkt: oktober 2026.</p>
+    </div>
+  </section>
+</Base>

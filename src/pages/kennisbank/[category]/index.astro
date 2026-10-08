@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import PageHero from '../../../components/PageHero.astro';
+import KennisbankList from '../../../components/KennisbankList.astro';
+import TwoDoors from '../../../components/TwoDoors.astro';
+import { KENNISBANK_CATEGORIES } from '../../../consts';
+import { breadcrumbs, webPage } from '../../../lib/schema';
+
+export function getStaticPaths() {
+  return Object.keys(KENNISBANK_CATEGORIES).map((category) => ({ params: { category } }));
+}
+const { category } = Astro.params;
+const cat = KENNISBANK_CATEGORIES[category];
+const all = (await getCollection('kennisbank')).sort((a, b) => +b.data.published - +a.data.published);
+const posts = all.filter((p) => p.data.category === category);
+const counts = all.reduce<Record<string, number>>((acc, p) => ((acc[p.data.category] = (acc[p.data.category] ?? 0) + 1), acc), {});
+const path = `/kennisbank/${category}/`;
+const title = `${cat.label}: artikelen over sportvoeding | Kennisbank VSN`;
+const description = `${cat.intro} Artikelen van sportdiëtisten van de Vereniging Sportvoedingsexperts Nederland.`.slice(0, 160);
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Kennisbank', href: '/kennisbank/' }, { name: cat.label, href: path }];
+---
+<Base {title} {description} schema={[webPage({ path, title, description, type: 'CollectionPage' }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} kicker="Kennisbank" title={cat.label} lead={cat.intro} />
+  <section class="section section--tight"><div class="wrap"><KennisbankList {posts} active={category} {counts} total={all.length} /></div></section>
+  <TwoDoors />
+</Base>

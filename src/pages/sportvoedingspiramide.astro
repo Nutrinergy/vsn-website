@@ -1,0 +1,55 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Pyramid from '../components/Pyramid.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import TwoDoors from '../components/TwoDoors.astro';
+import { breadcrumbs, webPage } from '../lib/schema';
+import piramide from '../assets/foto/sportvoedingspiramide.jpg';
+
+const title = 'De VSN sportvoedingspiramide: zo bouw je sportvoeding op';
+const description = 'De sportvoedingspiramide van de VSN laat zien hoe sportvoeding is opgebouwd: eerst basisvoeding, dan sportspecifieke voeding en pas daarna supplementen.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Sportvoedingspiramide', href: '/sportvoedingspiramide/' }];
+const posts = (await getCollection('kennisbank')).filter((p) => ['basisvoeding-de-sportvoedingspiramide', 'basisvoeding-koolhydraten', 'herstel-na-inspanning'].includes(p.id));
+---
+<Base {title} {description} image="/og/sportvoedingspiramide.jpg" imageAlt="De VSN sportvoedingspiramide" schema={[webPage({ path: '/sportvoedingspiramide/', title, description }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} kicker="Ontwikkeld door de VSN" title="De sportvoedingspiramide" lead="Sportdiëtisten kenden het principe al lang, maar er bestond nog geen goed beeld van. Daarom ontwikkelde de VSN de sportvoedingspiramide: hij laat de volgorde én de verhouding zien van de onderdelen waaruit sportvoeding bestaat." />
+
+  <section class="section section--tight" aria-label="Interactieve piramide">
+    <div class="wrap"><Pyramid headingLevel="h2" /></div>
+  </section>
+
+  <section class="section section--paper2" aria-labelledby="over">
+    <div class="wrap two">
+      <div class="prose" data-reveal>
+        <h2 id="over">Over de sportvoedingspiramide</h2>
+        <p>Zorg dat je basisvoeding op orde is voordat je begint met sportspecifieke voeding (voeding tijdens het sporten) en prestatiebevorderende vitaminen en supplementen. Dat geldt voor sporters op elk niveau.</p>
+        <p><strong>De onderste laag</strong> is de gezonde basisvoeding: groente, fruit, peulvruchten, noten, volkoren granen en eiwitrijke producten zoals zuivel, vlees, vis of vegetarische vervangers. Sporters hebben vaak meer van deze basis nodig dan niet-sporters, omdat ze meer energie verbruiken tijdens trainingen en wedstrijden.</p>
+        <p><strong>De middelste laag</strong> is sportspecifieke voeding: voeding die je rond en tijdens het sporten neemt. Dat kunnen gewone producten zijn, zoals een banaan tijdens de training of een bakje kwark erna. Zit je zes uur op de fiets of loop je vier uur aan een marathon, dan zijn sportgels en sportrepen nodig. De juiste timing is daarbij erg belangrijk.</p>
+        <p><strong>De top</strong> bestaat uit supplementen die de laatste paar procent van je prestatie kunnen verbeteren: vitaminen en mineralen, maar ook prestatiebevorderende middelen zoals cafeïne of creatine. Ze zijn geen vervanging van normale voeding maar een aanvulling, en ze werken pas optimaal als de basisvoeding en sportspecifieke voeding op orde zijn.</p>
+      </div>
+      <figure class="fig" data-reveal style="--d:1">
+        <Image src={piramide} alt="Illustratie van de VSN sportvoedingspiramide: onderaan basisvoeding met groente, fruit, brood, zuivel, vis en vlees; in het midden sportspecifieke voeding met sportdrank, repen en gels en een klok voor timing; bovenaan sportsupplementen" widths={[480, 800, 1200]} sizes="(min-width: 60rem) 40vw, 92vw" class="rounded" />
+        <figcaption>De VSN sportvoedingspiramide. © VSN</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="lees">
+    <div class="wrap">
+      <div class="section-head"><p class="label">Kennisbank</p><h2 id="lees">Verder lezen</h2></div>
+      <div class="cards">{posts.map((p) => <ArticleCard post={p} />)}</div>
+    </div>
+  </section>
+  <TwoDoors />
+</Base>
+<style>
+  .two { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 60rem) { .two { grid-template-columns: 1.1fr 0.9fr; } .fig { position: sticky; top: 6.5rem; } }
+  .two .prose h2 { margin-top: 0; }
+  .fig { margin: 0; display: grid; gap: 0.6rem; padding: var(--space-s); background: oklch(0.995 0.003 85); border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); }
+  .fig figcaption { font-size: 0.875rem; color: var(--muted); padding-inline: 0.4rem; }
+  .cards { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+</style>

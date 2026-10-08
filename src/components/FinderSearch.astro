@@ -1,0 +1,20 @@
+---
+interface Props { id?: string; size?: 'l' | 'm'; tone?: 'light' | 'dark' }
+const { id = 'q', size = 'm', tone = 'light' } = Astro.props;
+---
+<form class:list={['fsearch', size, tone]} action="/zoek-een-sport-dietist-in-de-buurt/" method="get" role="search">
+  <label for={id} class="visually-hidden">Plaats of postcode</label>
+  <svg class="pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.4" fill="currentColor"/></svg>
+  <input id={id} name="q" type="search" placeholder="Plaats of postcode" autocomplete="postal-code" enterkeyhint="search" />
+  <button class="btn" type="submit">Zoek <span class="visually-hidden">een sportdiëtist</span><span class="arrow" aria-hidden="true">→</span></button>
+</form>
+<style>
+  .fsearch { position: relative; width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem; border-radius: var(--radius-pill); background: oklch(0.995 0.003 85); box-shadow: 0 0 0 1.5px var(--line), var(--shadow-soft); max-width: 34rem; transition: box-shadow 0.2s var(--ease-out); }
+  .fsearch:focus-within { box-shadow: 0 0 0 2px var(--teal-deep), 0 0 0 6px oklch(0.64 0.103 194.6 / 0.22); }
+  .pin { width: 1.4rem; margin-left: 0.8rem; color: var(--orange-deep); flex: none; }
+  input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; padding: 0.7rem 0.4rem; font-size: 1.05rem; outline: none; }
+  input::placeholder { color: var(--muted); opacity: 1; }
+  .l input { font-size: 1.15rem; padding-block: 0.85rem; }
+  .l .btn { min-height: 3.4rem; padding-inline: 1.6rem; }
+  .dark { box-shadow: none; }
+</style>

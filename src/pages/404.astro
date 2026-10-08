@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Arcs from '../components/Arcs.astro';
+import FinderSearch from '../components/FinderSearch.astro';
+---
+<Base title="Pagina niet gevonden" description="Deze pagina bestaat niet (meer). Zoek een sportdiëtist of ga naar de homepage." noindex>
+  <section class="section nf">
+    <div class="wrap grid">
+      <div class="txt">
+        <p class="label">Fout 404</p>
+        <h1>Deze pagina is uit de bocht gevlogen.</h1>
+        <p class="lead">De pagina bestaat niet (meer). Misschien vind je hier wat je zocht:</p>
+        <ul class="links" role="list">
+          <li><a class="link-arrow" href="/zoek-een-sport-dietist-in-de-buurt/">Zoek een sportdiëtist <span class="arrow" aria-hidden="true">→</span></a></li>
+          <li><a class="link-arrow" href="/voeding-en-sport/">Voeding en sport <span class="arrow" aria-hidden="true">→</span></a></li>
+          <li><a class="link-arrow" href="/kennisbank/">Kennisbank <span class="arrow" aria-hidden="true">→</span></a></li>
+          <li><a class="link-arrow" href="/agenda/">Agenda <span class="arrow" aria-hidden="true">→</span></a></li>
+          <li><a class="link-arrow" href="/">Homepage <span class="arrow" aria-hidden="true">→</span></a></li>
+        </ul>
+        <FinderSearch id="nf-q" />
+      </div>
+      <Arcs class="nf-arcs" width={30} />
+    </div>
+  </section>
+</Base>
+<style>
+  .grid { display: grid; gap: var(--space-l); align-items: center; }
+  @media (min-width: 56rem) { .grid { grid-template-columns: 1.4fr 0.6fr; } }
+  .txt { display: grid; gap: var(--space-m); justify-items: start; }
+  .txt h1 { font-size: clamp(2.4rem, 1.3rem + 4vw, 5rem); max-width: 14ch; }
+  .links { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+  .grid :global(.nf-arcs) { width: min(320px, 60vw); justify-self: center; transform: rotate(18deg); }
+</style>

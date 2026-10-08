@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import EventRow from '../../components/EventRow.astro';
+import TwoDoors from '../../components/TwoDoors.astro';
+import { breadcrumbs, webPage, event as eventSchema } from '../../lib/schema';
+import { isUpcoming, eventSortKey } from '../../lib/format';
+import foto from '../../assets/foto/studiedag-presentatie.jpg';
+import { MEMBER_LOGIN } from '../../consts';
+
+const all = await getCollection('agenda');
+const upcoming = all.filter((e) => isUpcoming(e.data.start, e.data.end)).sort((a, b) => eventSortKey(a.data.start) - eventSortKey(b.data.start) || +a.data.start - +b.data.start);
+const past = all.filter((e) => !isUpcoming(e.data.start, e.data.end)).sort((a, b) => +b.data.start - +a.data.start);
+const years = [...new Set(past.map((e) => e.data.start.getFullYear()))];
+const title = 'Agenda: scholing, studiedagen en webinars voor sportdiëtisten';
+const description = 'De VSN-agenda met studiedagen, masterclasses, de ALV en interessante externe congressen en webinars over sportvoeding.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Agenda', href: '/agenda/' }];
+const ld = upcoming.map((e) => eventSchema({ path: `/agenda/${e.data.path}/`, title: e.data.title, description: e.data.summary, start: e.data.start, end: e.data.end, mode: e.data.mode, location: e.data.location, organizer: e.data.organizer, link: e.data.link }));
+---
+<Base {title} {description} schema={[webPage({ path: '/agenda/', title, description, type: 'CollectionPage' }), breadcrumbs(crumbs), ...ld]}>
+  <PageHero {crumbs} kicker="Agenda" title="Scholing en evenementen" lead="Studiedagen, masterclasses en de ALV van de VSN, aangevuld met congressen en webinars die we de moeite waard vinden." image={foto} imageAlt="Spreker presenteert de uitdagingen voor sporters tijdens de VSN studiedag" />
+
+  <section class="section section--tight" aria-labelledby="up">
+    <div class="wrap">
+      <div class="head">
+        <h2 id="up" class="h3">Komend</h2>
+        <div class="filters" role="group" aria-label="Filter op organisator" data-filter hidden>
+          <button aria-pressed="true" data-f="all">Alles</button>
+          <button aria-pressed="false" data-f="vsn">VSN</button>
+          <button aria-pressed="false" data-f="extern">Ook interessant</button>
+        </div>
+      </div>
+      {upcoming.length ? (
+        <ul class="list" role="list">{upcoming.map((e) => <li data-org={e.data.organizer}><EventRow event={e} /></li>)}</ul>
+      ) : (
+        <p class="empty">Er staan nu geen evenementen gepland. Leden ontvangen uitnodigingen per e-mail.</p>
+      )}
+      <p class="note">Ben je lid en wil je je aanmelden voor een VSN-evenement? Dat doe je via het <a href={MEMBER_LOGIN} rel="nofollow">ledenportaal</a>. Accreditatie- en SCAS-punten staan bij het evenement vermeld.</p>
+    </div>
+  </section>
+
+  <section class="section section--paper2 section--tight" aria-labelledby="archief">
+    <div class="wrap">
+      <h2 id="archief" class="h3">Archief</h2>
+      {years.map((y, i) => (
+        <details class="year" open={i === 0}>
+          <summary><span>{y}</span><span class="count">{past.filter((e) => e.data.start.getFullYear() === y).length} evenementen</span></summary>
+          <ul class="list" role="list">{past.filter((e) => e.data.start.getFullYear() === y).map((e) => <li><EventRow event={e} past /></li>)}</ul>
+        </details>
+      ))}
+    </div>
+  </section>
+  <TwoDoors />
+</Base>
+<script>
+  const group = document.querySelector<HTMLElement>('[data-filter]');
+  if (group) {
+    group.hidden = false;
+    const items = document.querySelectorAll<HTMLElement>('.list [data-org]');
+    group.querySelectorAll<HTMLButtonElement>('button').forEach((b) =>
+      b.addEventListener('click', () => {
+        group.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        items.forEach((li) => (li.hidden = b.dataset.f !== 'all' && li.dataset.org !== b.dataset.f));
+      }),
+    );
+  }
+</script>
+<style>
+  .head { display: flex; flex-wrap: wrap; gap: var(--space-s); justify-content: space-between; align-items: center; margin-bottom: var(--space-s); }
+  .filters { display: flex; gap: 0.35rem; padding: 0.3rem; border-radius: var(--radius-pill); background: var(--paper-2); }
+  .filters[hidden] { display: none; }
+  .filters button { border: 0; background: none; padding: 0.5rem 1rem; border-radius: var(--radius-pill); font-weight: 650; font-size: 0.925rem; color: var(--ink-2); }
+  .filters button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
+  .list { list-style: none; padding: 0; border-bottom: 1.5px solid var(--line); }
+  .note { margin-top: var(--space-m); color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
+  .empty { padding: var(--space-l); border-radius: var(--radius-m); background: var(--paper-2); }
+  .year { margin-top: var(--space-s); }
+  .year summary { display: flex; justify-content: space-between; align-items: center; padding: var(--space-s) 0; cursor: pointer; font-weight: 800; font-stretch: 118%; font-size: var(--step-2); list-style: none; border-bottom: 1.5px solid var(--line); }
+  .year summary::-webkit-details-marker { display: none; }
+  .year summary::after { content: '+'; font-weight: 400; color: var(--orange-deep); }
+  .year[open] summary::after { content: '−'; }
+  .count { margin-left: auto; margin-right: 1rem; font-size: 0.9rem; font-weight: 500; font-stretch: 100%; color: var(--muted); }
+</style>

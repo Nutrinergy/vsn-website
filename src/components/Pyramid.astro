@@ -1,0 +1,145 @@
+---
+/**
+ * Interactieve VSN-sportvoedingspiramide (tabs-patroon, werkt ook zonder JS: dan staan alle lagen open).
+ */
+interface Props { compact?: boolean; headingLevel?: 'h2' | 'h3' }
+const { compact = false, headingLevel: H = 'h3' } = Astro.props;
+const layers = [
+  {
+    id: 'supplementen',
+    n: '3',
+    name: 'Supplementen',
+    short: 'De laatste procenten',
+    text: 'De top bestaat uit supplementen die de laatste paar procent van je prestatie kunnen verbeteren: vitaminen en mineralen, maar ook prestatiebevorderende middelen zoals cafeïne of creatine. Ze vervangen geen normale voeding, ze vullen aan. Het effect komt pas als de lagen eronder op orde zijn.',
+    href: '/voeding-en-sport/supplementen/',
+    cta: 'Lees meer over supplementen',
+  },
+  {
+    id: 'sportspecifiek',
+    n: '2',
+    name: 'Sportspecifieke voeding',
+    short: 'Rond training en wedstrijd',
+    text: 'De middelste laag is voeding die je inneemt rond en tijdens het sporten. Vaak gewone producten, zoals een banaan tijdens de training of kwark na afloop. Zit je zes uur op de fiets of loop je een marathon, dan zijn sportdranken, gels en repen nodig. Timing is hier alles.',
+    href: '/voeding-en-sport/sport/',
+    cta: 'Voeding per sport',
+  },
+  {
+    id: 'basis',
+    n: '1',
+    name: 'Basisvoeding',
+    short: 'Het fundament',
+    text: 'De onderste laag is een gezonde basisvoeding: groente, fruit, peulvruchten, noten, volkoren granen en eiwitrijke producten zoals zuivel, vlees, vis of vegetarische vervangers. Sporters hebben vaak méér nodig van deze basis, omdat ze meer energie verbruiken.',
+    href: '/voeding-en-sport/basisvoeding/',
+    cta: 'Alles over basisvoeding',
+  },
+];
+---
+<div class:list={['pyr', { compact }]} data-pyramid>
+  <div class="stack" role="tablist" aria-label="Lagen van de sportvoedingspiramide" aria-orientation="vertical">
+    {layers.map((l, i) => (
+      <button
+        class={`layer layer--${l.id}`}
+        role="tab"
+        id={`tab-${l.id}`}
+        aria-controls={`panel-${l.id}`}
+        aria-selected={i === 2 ? 'true' : 'false'}
+        tabindex={i === 2 ? 0 : -1}
+        style={`--w:${[38, 69, 100][i]}%; --d:${2 - i}`}
+      >
+        <span class="ln">{l.n}</span>
+        <span class="lname">{l.name}</span>
+      </button>
+    ))}
+  </div>
+  <div class="panels">
+    {layers.map((l, i) => (
+      <div class="panel" role="tabpanel" id={`panel-${l.id}`} aria-labelledby={`tab-${l.id}`} data-open={i === 2 ? '' : undefined}>
+        <p class="label">Laag {l.n} · {l.short}</p>
+        <H class="ptitle">{l.name}</H>
+        <p>{l.text}</p>
+        <a class="link-arrow" href={l.href}>{l.cta} <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-pyramid]').forEach((root) => {
+    root.classList.add('is-enhanced');
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = root.querySelector<HTMLElement>('#' + t.getAttribute('aria-controls'));
+        if (panel) on ? panel.setAttribute('data-open', '') : panel.removeAttribute('data-open');
+      });
+      if (focus) tab.focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        const k = e.key;
+        let n = -1;
+        if (k === 'ArrowDown' || k === 'ArrowRight') n = (i + 1) % tabs.length;
+        if (k === 'ArrowUp' || k === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+        if (k === 'Home') n = 0;
+        if (k === 'End') n = tabs.length - 1;
+        if (n > -1) { e.preventDefault(); select(tabs[n], true); }
+      });
+    });
+  });
+</script>
+
+<style>
+  .pyr { display: grid; gap: var(--space-l); align-items: center; }
+  @media (min-width: 56rem) { .pyr { grid-template-columns: 1.05fr 1fr; gap: var(--space-xl); } }
+  .stack { display: grid; justify-items: center; gap: 6px; }
+  .layer {
+    --bg: var(--teal-ink); --fg: var(--paper);
+    position: relative;
+    width: var(--w);
+    min-height: 5.25rem;
+    display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+    padding: 0.75rem 1.25rem;
+    border: 0;
+    color: var(--fg);
+    background: var(--bg);
+    clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
+    font-weight: 750; font-stretch: 112%;
+    font-size: clamp(0.85rem, 0.7rem + 0.6vw, 1.1rem);
+    line-height: 1.15;
+    text-align: center;
+    transition: background-color 0.3s var(--ease-out), color 0.3s var(--ease-out), filter 0.25s var(--ease-out), transform 0.35s var(--ease-out);
+  }
+  .layer--supplementen { --bg: var(--orange); --fg: var(--ink); clip-path: polygon(50% 0, 50% 0, 100% 100%, 0 100%); min-height: 7rem; align-items: flex-end; padding-bottom: 1rem; }
+  .layer--sportspecifiek { --bg: var(--teal); --fg: var(--ink); clip-path: polygon(11% 0, 89% 0, 100% 100%, 0 100%); }
+  .layer--basis { clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); min-height: 6rem; }
+  .ln { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: oklch(0.975 0.008 85 / 0.18); font-size: 0.9rem; flex: none; }
+  .layer--supplementen .ln, .layer--sportspecifiek .ln { background: oklch(0.24 0.035 205 / 0.14); }
+  .layer--supplementen .lname { display: none; }
+  .layer:hover { filter: brightness(1.06) saturate(1.05); }
+  .layer[aria-selected='true'] { box-shadow: none; }
+  .is-enhanced .layer[aria-selected='false'] { --bg: var(--teal-tint); --fg: var(--teal-ink); }
+  .is-enhanced .layer--supplementen[aria-selected='false'] { --bg: var(--orange-tint); --fg: var(--ink); }
+  .is-enhanced .layer[aria-selected='false'] .ln { background: oklch(0.32 0.06 200 / 0.12); }
+  .is-enhanced .layer[aria-selected='false']:hover { --bg: oklch(0.88 0.06 192); }
+  .is-enhanced .layer--supplementen[aria-selected='false']:hover { --bg: oklch(0.88 0.08 65); }
+  .layer:focus-visible { outline: none; transform: scale(1.02); }
+  .layer:focus-visible .ln { outline: 3px solid var(--orange-deep); outline-offset: 2px; }
+  .panels { display: grid; }
+  .panel { grid-area: 1 / 1; display: grid; gap: var(--space-xs); align-content: start; }
+  .panel p:not(.label) { color: var(--ink-2); max-width: 52ch; }
+  .ptitle { font-size: var(--step-2); }
+  .is-enhanced .panel:not([data-open]) { visibility: hidden; opacity: 0; transform: translateY(8px); }
+  .is-enhanced .panel { transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out); }
+  .pyr:not(.is-enhanced) .panels { gap: var(--space-l); }
+  .pyr:not(.is-enhanced) .panel { grid-area: auto; }
+  @media (prefers-reduced-motion: no-preference) {
+    .js .layer { animation: rise 0.9s var(--ease-out) both; animation-delay: calc(var(--d) * 120ms + 150ms); }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } }
+  .compact .layer { min-height: 4.25rem; }
+  .compact .layer--supplementen { min-height: 5.5rem; }
+</style>

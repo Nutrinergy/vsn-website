@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { dayNum, monthShort, year, formatRange } from '../lib/format';
+interface Props { event: CollectionEntry<'agenda'>; headingLevel?: 'h2' | 'h3'; past?: boolean }
+const { event, headingLevel: H = 'h3', past = false } = Astro.props;
+const e = event.data;
+const href = `/agenda/${e.path}/`;
+const now = new Date();
+const ongoing = !past && !!e.end && e.start < now;
+const shown = ongoing && e.end ? e.end : e.start;
+---
+<article class:list={['ev', { past }]}>
+  <div class="date" aria-hidden="true">
+    {ongoing && <span class="tm">t/m</span>}
+    <span class="d">{dayNum(shown)}</span>
+    <span class="m">{monthShort(shown)}</span>
+    <span class="y">{year(shown)}</span>
+  </div>
+  <div class="info">
+    <p class="tags">
+      {e.organizer === 'vsn' ? <span class="tag tag--orange">VSN</span> : <span class="tag tag--line">Ook interessant</span>}
+      <span class="tag tag--line">{e.mode === 'online' ? 'Online' : 'Op locatie'}</span>
+      {e.membersOnly && <span class="tag">Alleen leden</span>}
+      {ongoing && <span class="tag tag--ink">Loopt nu</span>}
+    </p>
+    <H class="title"><a href={href}>{e.title}</a></H>
+    <p class="when"><time datetime={e.start.toISOString().slice(0, 10)}>{formatRange(e.start, e.end)}</time>{e.time && <> · {e.time}</>}{e.location && e.location !== 'Online' && <> · {e.location}</>}</p>
+  </div>
+  <span class="go" aria-hidden="true">→</span>
+</article>
+<style>
+  .ev { position: relative; display: grid; grid-template-columns: 4.5rem 1fr auto; gap: var(--space-m); align-items: center; padding-block: var(--space-m); border-top: 1.5px solid var(--line); }
+  .date { display: grid; justify-items: center; line-height: 1; padding: 0.7rem 0.4rem; border-radius: var(--radius-m); background: var(--ink); color: var(--paper); }
+  .d { font-size: 1.9rem; font-weight: 850; font-stretch: 120%; }
+  .m { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--orange); margin-top: 0.2rem; }
+  .y { font-size: 0.7rem; color: oklch(0.86 0.02 200); margin-top: 0.15rem; }
+  .past .y { color: var(--ink-2); }
+  .tm { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: oklch(0.86 0.02 200); margin-bottom: 0.2rem; }
+  .past .date { background: var(--paper-2); color: var(--ink-2); }
+  .past .m { color: var(--muted); }
+  .info { display: grid; gap: 0.35rem; }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .title { font-size: var(--step-1); font-stretch: 108%; line-height: 1.2; }
+  .title a { color: var(--ink); text-decoration: none; }
+  .title a::after { content: ''; position: absolute; inset: 0; }
+  .ev:hover .title a { text-decoration: underline; text-decoration-color: var(--orange); text-decoration-thickness: 2px; }
+  .when { font-size: 0.95rem; color: var(--ink-2); }
+  .when time::first-letter { text-transform: uppercase; }
+  .go { font-size: 1.5rem; color: var(--orange-deep); transition: transform 0.25s var(--ease-out); }
+  .ev:hover .go { transform: translateX(5px); }
+  @media (max-width: 30rem) { .ev { grid-template-columns: 3.75rem 1fr; } .go { display: none; } .d { font-size: 1.5rem; } }
+</style>

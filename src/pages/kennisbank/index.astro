@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import KennisbankList from '../../components/KennisbankList.astro';
+import TwoDoors from '../../components/TwoDoors.astro';
+import { breadcrumbs, webPage } from '../../lib/schema';
+
+const posts = (await getCollection('kennisbank')).sort((a, b) => +b.data.published - +a.data.published);
+const counts = posts.reduce<Record<string, number>>((acc, p) => ((acc[p.data.category] = (acc[p.data.category] ?? 0) + 1), acc), {});
+const title = 'Kennisbank sportvoeding: artikelen van sportdiëtisten';
+const description = 'Artikelen over sportvoeding, geschreven door sportdiëtisten van de VSN: koolhydraten, eiwitspreiding, herstel, plantaardig sporten en recepten.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: 'Kennisbank', href: '/kennisbank/' }];
+---
+<Base {title} {description} schema={[webPage({ path: '/kennisbank/', title, description, type: 'CollectionPage' }), breadcrumbs(crumbs)]}>
+  <PageHero {crumbs} kicker="Kennisbank" title="Kennis uit de praktijk" lead="Geschreven door sportdiëtisten, gebaseerd op wetenschap. Zonder hype, wel met getallen waar je iets mee kunt." />
+  <section class="section section--tight"><div class="wrap"><KennisbankList {posts} {counts} total={posts.length} /></div></section>
+  <TwoDoors />
+</Base>
